@@ -4,131 +4,284 @@
 
 {% block custom_css %}
 <style>
-    .chat-container {
-        max-width: 600px;
-        margin: 2rem auto;
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f5f5f5;
+    }
+
+   .chat-wrapper {
+    display: flex;
+    height: calc(100vh - 70px); /* sesuaikan tinggi navbar kamu */
+    width: 100%;
+    background-color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+
+    /* === SIDEBAR === */
+    .sidebar {
+        width: 30%;
+        background-color: #fff;
         display: flex;
         flex-direction: column;
-        height: 80vh;
-        border: 1px solid #ddd;
-        border-radius: 1rem;
-        overflow: hidden;
+        border-right: 1px solid #ddd;
+    }
+
+    .sidebar-header {
+        padding: 1rem;
+        font-weight: 700;
+        font-size: 1.3rem;
+        border-bottom: 1px solid #f1f1f1;
+    }
+
+    .search-box {
+        padding: 0.8rem;
+        border-bottom: 1px solid #f1f1f1;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 0.6rem 1rem;
+        border-radius: 20px;
+        border: 1px solid #ccc;
+        outline: none;
+    }
+
+    .chat-list {
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .chat-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.9rem 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid #f7f7f7;
+        transition: background 0.2s;
+    }
+
+    .chat-item:hover {
         background-color: #f9f9f9;
     }
 
-    .chat-header {
-        padding: 1rem;
-        background-color: #ff8c00;
-        color: white;
+    .chat-item img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .chat-info {
+        display: flex;
+        flex-direction: column;
+        font-size: 0.95rem;
+    }
+
+    .chat-info span {
         font-weight: 600;
+        color: #111;
+    }
+
+    .chat-info small {
+        color: #666;
+    }
+
+    /* === AREA CHAT === */
+    .chat-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: #fff;
+        position: relative;
+    }
+
+    .chat-header {
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid #ddd;
+        background-color: #fff;
+    }
+
+    .chat-header img {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .chat-header .info {
+        display: flex;
+        flex-direction: column;
+        font-size: 0.95rem;
+    }
+
+    .chat-header .info span {
+        font-weight: 600;
+        color: #222;
+    }
+
+    .chat-header .info small {
+        color: #777;
     }
 
     .chat-messages {
         flex: 1;
-        padding: 1rem;
+        padding: 1.2rem;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
-        background-color: #f4f4f4;
+        gap: 0.8rem;
+        background-color: #fff;
     }
 
     .message {
         max-width: 70%;
         padding: 0.6rem 1rem;
-        border-radius: 1rem;
+        border-radius: 10px;
         word-wrap: break-word;
+        font-size: 0.95rem;
+        line-height: 1.4;
     }
 
     .message.user {
-        background-color: #ff8c00;
-        color: white;
+        background-color: #ffe3d0;
         align-self: flex-end;
         border-bottom-right-radius: 0;
     }
 
     .message.tukang {
-        background-color: #e2e2e2;
-        color: #333;
+        background-color: #f1f1f1;
         align-self: flex-start;
         border-bottom-left-radius: 0;
     }
 
     .chat-input {
         display: flex;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-top: 1px solid #ddd;
+        align-items: center;
+        padding: 0.8rem 1rem;
         background-color: #fff;
+        border-top: 1px solid #ddd;
+        gap: 0.5rem;
     }
 
     .chat-input input {
         flex: 1;
-        padding: 0.5rem 1rem;
-        border-radius: 999px;
+        padding: 0.7rem 1rem;
+        border-radius: 25px;
         border: 1px solid #ccc;
+        outline: none;
+        background-color: #fff;
+        font-size: 0.95rem;
     }
 
     .chat-input button {
-        background-color: #ff8c00;
-        color: white;
+        background-color: #ff914d; /* oranye */
+        color: #fff;
         border: none;
-        padding: 0 20px;
-        border-radius: 999px;
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
         cursor: pointer;
+        font-size: 1.2rem;
+        transition: background 0.2s;
+    }
+
+    .chat-input button:hover {
+        background-color: #ff7b29;
     }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="chat-wrapper">
 
-<div class="chat-container">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-header">Chat</div>
+        <div class="search-box">
+            <input type="text" placeholder="Search or start new chat">
+        </div>
 
-    <div class="chat-header">
-        <i class="bi bi-arrow-left" style="cursor:pointer" onclick="window.history.back()"></i>
-        Chat dengan {{ tukang.nama }}
+        <div class="chat-list">
+            <div class="chat-item" onclick="selectChat('Ahmad Imam')">
+                <img src="https://pengadaan.or.id/wp-content/uploads/2023/10/tukang-bangunan-1.jpg" alt="Ahmad">
+                <div class="chat-info">
+                    <span>Ahmad Imam</span>
+                    <small>hai, tukang, atap rumahku bocor</small>
+                </div>
+            </div>
+            <div class="chat-item" onclick="selectChat('Budi Listrik')">
+                <img src="https://pengadaan.or.id/wp-content/uploads/2023/10/tukang-bangunan-1.jpg" alt="Budi">
+                <div class="chat-info">
+                    <span>Budi Listrik</span>
+                    <small>Oke, saya segera ke sana</small>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="chat-messages" id="chatMessages">
-        <div class="message tukang">Halo, ada yang bisa saya bantu?</div>
-        <div class="message user">Saya ingin memperbaiki pipa bocor.</div>
-    </div>
+    <!-- AREA CHAT -->
+    <div class="chat-main">
+        <div class="chat-header">
+            <img id="chatImage" src="https://pengadaan.or.id/wp-content/uploads/2023/10/tukang-bangunan-1.jpg" alt="Tukang">
+            <div class="info">
+                <span id="chatName">Ahmad Imam</span>
+                <small>online</small>
+            </div>
+        </div>
 
-    <form class="chat-input" id="chatForm">
-        <input type="text" id="messageInput" placeholder="Tulis pesan..." autocomplete="off">
-        <button type="submit">Kirim</button>
-    </form>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message tukang">Hai, ada yang bisa saya bantu?</div>
+            <div class="message user">Tukang, atap rumahku bocor nih.</div>
+        </div>
+
+        <form class="chat-input" id="chatForm">
+            <input type="text" id="messageInput" placeholder="Ketik pesan...">
+            <button type="submit"><i class="bi bi-send"></i></button>
+        </form>
+    </div>
 </div>
 
 <script>
     const chatForm = document.getElementById('chatForm');
     const chatMessages = document.getElementById('chatMessages');
     const messageInput = document.getElementById('messageInput');
+    const chatName = document.getElementById('chatName');
+    const chatImage = document.getElementById('chatImage');
 
-    chatForm.addEventListener('submit', function(e) {
+    chatForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const text = messageInput.value.trim();
-        if(text === '') return;
+        if (!text) return;
 
-        const userMessage = document.createElement('div');
-        userMessage.classList.add('message', 'user');
-        userMessage.textContent = text;
-        chatMessages.appendChild(userMessage);
-
+        const userMsg = document.createElement('div');
+        userMsg.classList.add('message', 'user');
+        userMsg.textContent = text;
+        chatMessages.appendChild(userMsg);
         chatMessages.scrollTop = chatMessages.scrollHeight;
         messageInput.value = '';
 
         setTimeout(() => {
-            const tukangMessage = document.createElement('div');
-            tukangMessage.classList.add('message', 'tukang');
-            tukangMessage.textContent = "Pesan diterima, Pak.";
-            chatMessages.appendChild(tukangMessage);
+            const reply = document.createElement('div');
+            reply.classList.add('message', 'tukang');
+            reply.textContent = "Pesan diterima, Pak.";
+            chatMessages.appendChild(reply);
             chatMessages.scrollTop = chatMessages.scrollHeight;
-        }, 800);
+        }, 700);
     });
-</script>
 
+    function selectChat(nama) {
+        chatName.textContent = nama;
+        chatMessages.innerHTML = `
+            <div class="message tukang">Halo, saya ${nama}. Ada yang bisa saya bantu?</div>
+        `;
+    }
+</script>
 {% endblock %}

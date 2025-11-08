@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block title %}Riwayat Pesanan - Teman Tukang{% endblock %}
 {% set active_page = 'riwayat_pesanan' %}
 
@@ -11,9 +10,11 @@
 
     .header-title {
         font-size: 2rem;
-        font-weight: 600;
+        font-weight: 700;
         color: #333;
         margin-bottom: 30px;
+        border-left: 5px solid #ff8c00;
+        padding-left: 10px;
     }
 
     .order-card {
@@ -48,15 +49,28 @@
         display: flex;
         align-items: center;
     }
-    .order-date i { margin-right: 6px; }
 
-    .badge-selesai {
-        background-color: #a4e4a4;
-        color: #333;
+    .order-date i {
+        margin-right: 6px;
+    }
+
+    /* 🔹 Badge status */
+    .badge-status {
         font-weight: 600;
-        padding: 5px 12px;
+        padding: 6px 14px;
         border-radius: 20px;
         font-size: 0.8rem;
+        text-transform: capitalize;
+    }
+
+    .status-menunggu {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-selesai {
+        background-color: #d4edda;
+        color: #155724;
     }
 
     .btn-ulasan {
@@ -79,36 +93,37 @@
 
 {% block content %}
 <div class="container my-5">
-
     <h2 class="header-title">Riwayat Pesanan</h2>
 
-{% if orders %}
-    {% for order_id, pesanan in orders.items() %}
-    <div class="order-card d-flex justify-content-between align-items-center">
-        <div>
-            <p class="order-title">{{ pesanan.layanan }}</p>
-            <p class="order-tukang">{{ pesanan.tukang }}</p>
-            <p class="order-date"><i class="bi bi-calendar"></i> {{ pesanan.tanggal }}</p>
-        </div>
+    {% if orders %}
+        {% for order_id, pesanan in orders.items() %}
+        <div class="order-card d-flex justify-content-between align-items-center">
+            <div>
+                <p class="order-title">{{ pesanan.layanan }}</p>
+                <p class="order-tukang">{{ pesanan.tukang }}</p>
+                <p class="order-date"><i class="bi bi-calendar"></i> {{ pesanan.tanggal }}</p>
+            </div>
 
-        <div class="d-flex flex-column align-items-end">
-            <span class="badge-selesai mb-3">{{ pesanan.status }}</span>
-
-            <a href="{{ url_for('tulis_ulasan', order_id=order_id) }}" class="btn-ulasan">
-                Beri Rating & Ulasan
-            </a>
+            <div class="d-flex flex-column align-items-end">
+                {% if pesanan.status == 'Selesai' %}
+                    <span class="badge-status status-selesai mb-3">Selesai</span>
+                    <a href="{{ url_for('tulis_ulasan', order_id=order_id) }}" class="btn-ulasan">
+                        Beri Rating & Ulasan
+                    </a>
+                {% else %}
+                    <span class="badge-status status-menunggu mb-3">Menunggu Konfirmasi</span>
+                {% endif %}
+            </div>
         </div>
-    </div>
-    {% endfor %}
-{% else %}
-    <div class="text-center alert alert-info">
-        Anda belum memiliki riwayat pesanan.
-    </div>
-{% endif %}
+        {% endfor %}
+    {% else %}
+        <div class="text-center alert alert-info">
+            Anda belum memiliki riwayat pesanan.
+        </div>
+    {% endif %}
 
     <div class="text-center mt-4">
         <small class="text-muted">Tidak ada riwayat pesanan lebih lanjut.</small>
     </div>
-
 </div>
 {% endblock %}

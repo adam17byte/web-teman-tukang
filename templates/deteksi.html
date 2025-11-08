@@ -4,28 +4,47 @@
 
 {% block custom_css %}
 <style>
+    body {
+        background-color: #f8f9fa;
+    }
+
     .page-header-title {
         font-size: 2rem;
         font-weight: 700;
         color: #333;
-        text-align: center;
-        margin-bottom: 25px;
+        border-left: 5px solid #ff8c00;
+        padding-left: 10px;
+        margin-bottom: 35px;
+        text-align: left;
     }
 
+    /* 🔸 Wrapper agar card tetap di tengah */
+    .detection-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    /* 🔸 Card dilebarin */
     .detection-card {
-        max-width: 520px;
-        padding: 35px;
+        width: 100%;
+        max-width: 650px; /* 🔹 dari 460px jadi 650px */
+        padding: 40px; /* 🔹 tambah padding biar isi tetap lega */
         background: white;
         border-radius: 16px;
-        margin: 0 auto 80px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.07);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        transition: 0.2s ease-in-out;
+    }
+
+    .detection-card:hover {
+        box-shadow: 0 10px 28px rgba(0,0,0,0.12);
     }
 
     .upload-area {
         border: 2px dashed #ff8c00;
         border-radius: 12px;
         width: 100%;
-        height: 280px;
+        height: 300px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -38,7 +57,7 @@
     }
 
     .upload-area:hover {
-        border-color: #444;
+        border-color: #333;
         background: #f2f2f2;
     }
 
@@ -59,8 +78,8 @@
         border-radius: 8px;
         padding: 14px;
         font-weight: 600;
-        font-size: 1.1rem;
-        margin-top: 20px;
+        font-size: 1.05rem;
+        margin-top: 25px;
         transition: 0.2s;
     }
 
@@ -73,6 +92,19 @@
         background: #ccc;
         cursor: not-allowed;
     }
+
+    @media (max-width: 768px) {
+        .page-header-title {
+            text-align: center;
+        }
+        .detection-card {
+            max-width: 90%;
+            padding: 25px;
+        }
+        .upload-area {
+            height: 240px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -81,33 +113,32 @@
 
     <h2 class="page-header-title">Deteksi Kerusakan</h2>
 
-    <div class="detection-card">
+    <div class="detection-wrapper">
+        <div class="detection-card">
+            <form method="POST" enctype="multipart/form-data" action="{{ url_for('deteksi') }}">
+                <label for="file-input" class="upload-area" id="upload-box">
+                    <i class="bi bi-cloud-arrow-up-fill" id="upload-icon" style="font-size:60px; color:#888;"></i>
+                    <p id="upload-text" class="mt-2 text-muted">Klik untuk pilih gambar</p>
+                    <img id="preview-img">
+                </label>
 
-        <form method="POST" enctype="multipart/form-data" action="{{ url_for('deteksi') }}">
+                <input type="file" name="file" id="file-input" accept="image/*" required>
 
-            <label for="file-input" class="upload-area" id="upload-box">
-                <i class="bi bi-cloud-arrow-up-fill" id="upload-icon" style="font-size:60px; color:#888;"></i>
-                <p id="upload-text" class="mt-2 text-muted">Klik untuk pilih gambar</p>
-                <img id="preview-img">
-            </label>
+                <button type="submit" class="btn-deteksi" id="btn-deteksi" disabled>
+                    Deteksi
+                </button>
+            </form>
 
-            <input type="file" name="file" id="file-input" accept="image/*" required>
-
-            <button type="submit" class="btn-deteksi" id="btn-deteksi" disabled>
-                Deteksi
-            </button>
-        </form>
-
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="alert alert-info mt-3">
-                {% for message in messages %}
-                    {{ message }}
-                {% endfor %}
-            </div>
-        {% endif %}
-        {% endwith %}
-
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-info mt-3">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% endwith %}
+        </div>
     </div>
 </div>
 
@@ -121,7 +152,6 @@
     fileInput.addEventListener("change", () => {
         if (fileInput.files && fileInput.files[0]) {
             btnDeteksi.disabled = false;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 previewImg.src = e.target.result;

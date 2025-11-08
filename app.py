@@ -7,9 +7,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'kunci-rahasia-teman-tukang-yang-kuat'
 
 SIMULATED_ORDERS = {
-    101: {'layanan': 'Perbaikan Pipa Bocor', 'tukang': 'Ahmad Imam', 'tanggal': '15/10/2025', 'status': 'Selesai'},
+    101: {'layanan': 'Perbaikan Pipa Bocor', 'tukang': 'Ahmad Imam', 'tanggal': '15/10/2025', 'status': 'Menunggu'},
     102: {'layanan': 'Pemasangan Keramik', 'tukang': 'Ibu Rina', 'tanggal': '01/11/2025', 'status': 'Selesai'},
-    103: {'layanan': 'Instalasi Listrik', 'tukang': 'Bpk. Sadi', 'tanggal': '05/11/2025', 'status': 'Selesai'}
 }
 
 SIMULATED_TUKANG = [
@@ -159,6 +158,27 @@ def profil_edit():
         return redirect(url_for("profil_edit"))
 
     return render_template("profil_edit.html", active_page="profil_edit")
+
+@app.route("/notifikasi")
+def notifikasi():
+    notifications = [
+        {
+            "pesan": "Tukang Budi membalas pesan Anda",
+            "detail": "“Baik, saya bisa datang besok pagi.”",
+            "tanggal": "08/11/2025"
+        },
+        {
+            "pesan": "Pesanan Anda telah dikirim ke Tukang Siti Aminah",
+            "detail": "Layanan: Instalasi Listrik Rumah",
+            "tanggal": "07/11/2025"
+        },
+        {
+            "pesan": "Tukang Agus mengirim pesan baru",
+            "detail": "“Apakah warna keramiknya putih polos?”",
+            "tanggal": "06/11/2025"
+        }
+    ]
+    return render_template("notifikasi.html", notifications=notifications, active_page="notifikasi")
 
 @app.route('/logout')
 def logout():

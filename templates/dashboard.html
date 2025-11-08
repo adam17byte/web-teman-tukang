@@ -1,15 +1,13 @@
 {% extends "base.html" %}
-
 {% block title %}Beranda - Teman Tukang{% endblock %}
-
 {% set active_page = 'dashboard' %}
 
 {% block custom_css %}
 <style>
+    /* Hero Section */
     .hero-section {
         width: 100%;
         height: 550px;
-        overflow: hidden;
         background-image: url('https://assets.promediateknologi.id/crop/0x0:0x0/750x500/webp/photo/2023/02/11/969053708.jpeg');
         background-size: cover;
         background-position: center;
@@ -33,29 +31,62 @@
         font-size: 2.5rem;
         font-weight: bold;
         color: #ff8c00;
-        margin-bottom: 5px;
+        margin-bottom: 10px;
     }
 
     .hero-subtitle {
         font-size: 1.1rem;
-        color: #333;
+        color: #3d3d3d;
         max-width: 650px;
+        margin-bottom: 25px;
     }
 
+    .hero-btn {
+        background-color: #ff8c00;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: 0.2s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+    .hero-btn:hover {
+        background-color: #e67e00;
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    /* Section Titles */
     .content-title {
-        font-size: 1.5rem;
+        font-size: 1.6rem;
         font-weight: 600;
         margin-bottom: 25px;
         text-align: center;
+        color: #333;
     }
 
+    /* Layanan */
     .content-box {
         background-color: white;
         border: 1px solid #eee;
-        height: 200px;
         border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0,0,0,.05);
         transition: 0.2s;
+        height: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        font-weight: 500;
+        text-align: center;
+    }
+    .content-box i {
+        font-size: 2.5rem;
+        color: #ff8c00;
+        margin-bottom: 10px;
     }
     .content-box:hover {
         transform: translateY(-3px);
@@ -63,61 +94,306 @@
         cursor: pointer;
     }
 
+    /* Artikel Horizontal */
+    .article-card {
+        display: flex;
+        background: white;
+        border-radius: 10px;
+        border: 1px solid #eee;
+        box-shadow: 0 2px 6px rgba(0,0,0,.08);
+        overflow: hidden;
+        margin-bottom: 25px;
+        transition: 0.2s ease-in-out;
+    }
+    .article-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+    }
+    .article-card img {
+        width: 40%;
+        height: 230px;
+        object-fit: cover;
+    }
+    .article-content {
+        padding: 18px 22px;
+        width: 60%;
+    }
+    .article-card h5 {
+        color: #ff8c00;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    .article-card p {
+        color: #555;
+        font-size: 0.95rem;
+        text-align: justify;
+        margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
+        .article-card {
+            flex-direction: column;
+        }
+        .article-card img {
+            width: 100%;
+            height: 200px;
+        }
+        .article-content {
+            width: 100%;
+        }
+    }
+
+    /* Tombol Chat */
     .floating-chat-btn {
         position: fixed;
         bottom: 25px;
         right: 25px;
-        width: 65px;
-        height: 65px;
+        width: 60px;
+        height: 60px;
         background-color: #ff8c00;
+        color: white;
         border-radius: 50%;
         display: flex;
-        justify-content: center;
         align-items: center;
-        color: white;
-        font-size: 1.7rem;
-        box-shadow: 0 4px 8px rgba(0,0,0,.2);
+        justify-content: center;
+        font-size: 1.8rem;
         cursor: pointer;
-        z-index: 999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 1000;
+        transition: 0.2s ease;
     }
     .floating-chat-btn:hover {
         background-color: #e67e00;
+        transform: scale(1.05);
     }
+/* Popup Chat */
+.chat-popup {
+    display: none;
+    flex-direction: column;
+    position: fixed;
+    bottom: 90px;
+    right: 25px;
+    width: 320px;
+    height: 420px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.25);
+    overflow: hidden;
+    z-index: 1050;
+}
+.chat-header {
+    background: #ff8c00;
+    color: white;
+    padding: 12px 16px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+}
+
+/* Isi Chat */
+.chat-body {
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.message {
+    padding: 10px 15px;
+    border-radius: 20px;
+    max-width: 80%;
+    font-size: 0.95rem;
+    position: relative;
+}
+.message.user {
+    background-color: #ffeed9;
+    align-self: flex-end;
+    border-bottom-right-radius: 5px;
+}
+.message.user::after {
+    content: "";
+    position: absolute;
+    right: -6px;
+    bottom: 0;
+    width: 10px;
+    height: 10px;
+    background-color: #ffeed9;
+    clip-path: polygon(0 0, 100% 100%, 0 100%);
+}
+.message.bot {
+    background-color: #f1f1f1;
+    align-self: flex-start;
+    border-bottom-left-radius: 5px;
+}
+.message.bot::after {
+    content: "";
+    position: absolute;
+    left: -6px;
+    bottom: 0;
+    width: 10px;
+    height: 10px;
+    background-color: #f1f1f1;
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+/* Input Pesan */
+.chat-input-area {
+    display: flex;
+    align-items: center;
+    border-top: 1px solid #eee;
+    padding: 8px;
+    background-color: #fff;
+}
+.chat-input-area input {
+    flex: 1;
+    border: none;
+    border-radius: 25px;
+    background: #f5f5f5;
+    padding: 10px 15px;
+    outline: none;
+    font-size: 0.9rem;
+    margin-right: 8px;
+}
+.chat-input-area button {
+    background-color: #ff8c00;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.chat-input-area button:hover {
+    background-color: #e67e00;
+}
+
 </style>
 {% endblock %}
 
 {% block content %}
 
+<!-- Hero Section -->
 <div class="container-fluid p-0">
     <div class="hero-section">
         <div class="hero-overlay">
             <h1 class="hero-title">Selamat Datang!</h1>
             <p class="hero-subtitle">
                 Temukan layanan tukang profesional dan terpercaya untuk semua kebutuhan renovasi dan perbaikan Anda.
+                Ingin mendapatkan tukang yang cocok berdasarkan permasalahan rumahmu?
             </p>
+            <a href="{{ url_for('deteksi') }}" class="hero-btn">Temukan Tukang</a>
         </div>
     </div>
 </div>
 
+<!-- Layanan -->
 <div class="container mt-5">
-
     <h3 class="content-title">Layanan Teman Tukang</h3>
-    <div class="row mb-5">
-        <div class="col-md-4"><div class="content-box"></div></div>
-        <div class="col-md-4"><div class="content-box"></div></div>
-        <div class="col-md-4"><div class="content-box"></div></div>
-    </div>
-
-    <h3 class="content-title">Panduan</h3>
     <div class="row justify-content-center mb-5">
-        <div class="col-md-4"><div class="content-box"></div></div>
-        <div class="col-md-4"><div class="content-box"></div></div>
+        <div class="col-md-4 mb-3">
+            <div class="content-box">
+                <i class="bi bi-tools"></i> Perbaikan Rumah
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="content-box">
+                <i class="bi bi-wrench-adjustable"></i> Pemeliharaan Rumah
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="content-box">
+                <i class="bi bi-house-gear"></i> Renovasi & Peningkatan
+            </div>
+        </div>
     </div>
 
+    <!-- Artikel -->
+    <h3 class="content-title">Artikel Perbaikan Rumah</h3>
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-10">
+            <div class="article-card">
+                <img src="https://www.permagard.co.uk/media/mageplaza/blog/post/blog/main_image/Crack-Stitching-Featured-Image.jpg" alt="Dinding Retak">
+                <div class="article-content">
+                    <h5>Tips Mendeteksi dan Memperbaiki Dinding Retak</h5>
+                    <p>Dinding yang retak bisa menjadi tanda masalah struktural. Retakan halus disebabkan penyusutan plester, sementara retakan besar bisa menandakan fondasi bermasalah. Gunakan mortar berkualitas dan konsultasikan dengan tukang profesional bila perlu.</p>
+                </div>
+            </div>
+
+            <div class="article-card">
+                <img src="https://i0.wp.com/blog.kredivo.com/wp-content/uploads/2022/11/atap-bocor.jpeg?fit=1920%2C1141&ssl=1" alt="Atap Bocor">
+                <div class="article-content">
+                    <h5>Cara Menangani Atap Bocor</h5>
+                    <p>Atap bocor sering disebabkan oleh genteng bergeser, retakan kecil, atau lapisan waterproofing yang aus. Periksa sumber kebocoran secara menyeluruh, bersihkan lumut, dan aplikasikan lapisan anti bocor untuk mencegah rembesan kembali.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="floating-chat-btn" onclick="window.location.href='#';">
+<!-- Tombol Chat Mengambang -->
+<div class="floating-chat-btn" id="openChatBtn">
     <i class="bi bi-robot"></i>
 </div>
+
+<!-- Popup Chat -->
+<div class="chat-popup" id="chatPopup">
+    <div class="chat-header">
+        <span>Chatbot</span>
+        <button id="closeChatBtn" class="close-btn">&times;</button>
+    </div>
+    <div class="chat-body">
+        <div class="message bot">Halo! Ada yang bisa saya bantu hari ini? 🤖</div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="userInput" placeholder="Tulis pesan..." />
+        <button id="sendBtn"><i class="bi bi-send"></i></button>
+    </div>
+</div>
+
+<script>
+    const chatPopup = document.getElementById('chatPopup');
+    const openChatBtn = document.getElementById('openChatBtn');
+    const closeChatBtn = document.getElementById('closeChatBtn');
+    const chatBody = document.querySelector('.chat-body');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    openChatBtn.onclick = () => chatPopup.style.display = 'flex';
+    closeChatBtn.onclick = () => chatPopup.style.display = 'none';
+
+    sendBtn.onclick = () => {
+        const msg = userInput.value.trim();
+        if (msg) {
+            const userMsg = document.createElement('div');
+            userMsg.classList.add('message', 'user');
+            userMsg.textContent = msg;
+            chatBody.appendChild(userMsg);
+            userInput.value = '';
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            setTimeout(() => {
+                const botMsg = document.createElement('div');
+                botMsg.classList.add('message', 'bot');
+                botMsg.textContent = 'Pesan kamu sudah diterima! 😊';
+                chatBody.appendChild(botMsg);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 800);
+        }
+    };
+</script>
 
 {% endblock %}

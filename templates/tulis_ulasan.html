@@ -1,28 +1,36 @@
 {% extends "base.html" %}
-
 {% block title %}Beri Rating & Ulasan{% endblock %}
 
 {% block custom_css %}
 <style>
+    .review-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 90vh;
+        margin-top: -20px; /* Naikin posisi card sedikit */
+    }
+
     .review-box {
         width: 100%;
-        max-width: 500px;
+        max-width: 720px; /* ⬅️ Card lebih lebar */
         background: white;
-        padding: 35px;
+        padding: 35px 45px;
         border-radius: 14px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        box-shadow: 0 5px 18px rgba(0,0,0,0.08);
         text-align: center;
+        transform: scale(0.95); /* ⬅️ Kecilkan tampilan keseluruhan */
     }
 
     .review-title {
-        font-size: 1.8rem;
+        font-size: 1.6rem; /* ⬅️ Lebih kecil dari sebelumnya */
         font-weight: 600;
         color: #333;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
     }
 
     .rating-stars i {
-        font-size: 2.3rem;
+        font-size: 1.9rem; /* ⬅️ Kecilkan bintang */
         color: #ccc;
         cursor: pointer;
         margin: 0 3px;
@@ -35,42 +43,51 @@
 
     textarea {
         width: 100%;
-        background: #f1f1f1;
+        background: #f8f8f8;
         border: none;
         border-radius: 10px;
-        padding: 15px;
+        padding: 12px;
         resize: vertical;
-        font-size: 1rem;
+        font-size: 0.95rem; /* ⬅️ Font lebih kecil */
         color: #333;
-        margin-top: 15px;
+        margin-top: 12px;
     }
 
     .btn-orange {
         background-color: #ff8c00;
         border: none;
-        padding: 10px 30px;
+        padding: 8px 28px; /* ⬅️ Lebih ramping */
         border-radius: 8px;
         color: white;
         font-weight: 600;
-        font-size: 1rem;
+        font-size: 0.95rem;
         transition: 0.2s;
     }
 
     .btn-orange:hover {
         background-color: #e67e00;
     }
+
+    @media (max-width: 768px) {
+        .review-box {
+            max-width: 95%;
+            padding: 25px;
+            transform: scale(1);
+        }
+        .review-title {
+            font-size: 1.4rem;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container d-flex justify-content-center align-items-center min-vh-100">
+<div class="container review-container">
     <div class="review-box">
 
         <form method="POST" action="{{ url_for('tulis_ulasan', order_id=order_id) }}">
-
             <h2 class="review-title">Beri Rating & Ulasan</h2>
-
-            <p class="mb-2" style="color:#555;">Penilaian Anda untuk tukang ini</p>
+            <p class="mb-2" style="color:#555; font-size:0.95rem;">Penilaian Anda untuk tukang ini</p>
 
             <div class="rating-stars mb-3">
                 <i class="bi bi-star-fill active" data-value="1"></i>
@@ -87,8 +104,8 @@
             <div class="mt-4">
                 <button class="btn-orange" type="submit">Kirim</button>
             </div>
-
         </form>
+
     </div>
 </div>
 
@@ -102,7 +119,6 @@
             ratingInput.value = rating;
 
             stars.forEach(s => s.classList.remove("active"));
-
             for (let i = 0; i < rating; i++) {
                 stars[i].classList.add("active");
             }

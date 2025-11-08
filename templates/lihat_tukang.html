@@ -4,144 +4,226 @@
 
 {% block custom_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <style>
-    .container-profil {
-        max-width: 700px;
-        margin: 2rem auto;
-        padding: 1.5rem;
-        background: #fff;
-        border-radius: 15px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', sans-serif;
+        color: #333;
     }
 
-    .profil-header {
+    /* HEADER PROFIL */
+    .profil-section {
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 2.5rem;
+        padding: 2rem 6rem;
+        border-bottom: 2px solid #eee;
+        background-color: #fff;
     }
 
-    .profil-header img {
-        width: 120px;
-        height: 120px;
+    .profil-section img {
+        width: 180px;
+        height: 180px;
         object-fit: cover;
         border-radius: 15px;
+        border: 3px solid #ff8c00;
     }
 
     .profil-info h2 {
-        font-size: 1.5rem;
+        font-size: 2.2rem;
         font-weight: 700;
-        margin: 0;
+        margin-bottom: 0.5rem;
     }
 
     .profil-info p {
-        margin: 4px 0;
-        font-size: 1rem;
-        color: #555;
+        font-size: 1.05rem;
+        margin: 0.3rem 0;
+    }
+
+    .profil-rating {
+        margin-top: 0.8rem;
     }
 
     .star-icon {
         color: #FFD700;
-        font-size: 1rem;
+        font-size: 1.1rem;
     }
+
     .star-icon.inactive {
         color: #ccc;
     }
 
-    .pengalaman {
-        margin-top: 1rem;
+    .profil-rating span {
         font-size: 0.95rem;
+        color: #666;
+        margin-left: 6px;
+    }
+
+    /* PENGALAMAN SECTION */
+    .pengalaman-section {
+        padding: 2rem 6rem;
+        background: #fff7f0;
+    }
+
+    .pengalaman-section h3 {
+        font-size: 1.4rem;
+        font-weight: 700;
         color: #333;
+        margin-bottom: 1rem;
     }
 
-    .review-container {
-        margin-top: 2rem;
+    .pengalaman-section ul {
+        list-style-type: disc;
+        margin-left: 1.5rem;
+        color: #555;
+        font-size: 1.05rem;
+        line-height: 1.6;
     }
 
-    .review-summary {
+    /* REVIEW SECTION */
+    .review-section {
+        padding: 2rem 6rem;
+        background: #fff;
+    }
+
+    .review-header {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 0.5rem;
+        background: #fff3e1;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
         font-weight: 600;
+        color: #444;
+        margin-bottom: 1.5rem;
+    }
+
+    .review-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
         margin-bottom: 1rem;
     }
 
     .review-item {
         display: flex;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-        padding: 0.75rem;
+        gap: 1rem;
         background: #f9f9f9;
-        border-radius: 10px;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        transition: 0.25s ease;
+    }
+
+    .review-item:hover {
+        background: #fff3e1;
     }
 
     .review-item img {
-        width: 50px;
-        height: 50px;
+        width: 55px;
+        height: 55px;
         border-radius: 50%;
         object-fit: cover;
     }
 
+    .review-content strong {
+        font-size: 1rem;
+        color: #333;
+    }
+
     .review-content p {
-        margin: 2px 0;
+        margin: 3px 0;
+        color: #444;
+    }
+
+    @media (max-width: 768px) {
+        .profil-section {
+            flex-direction: column;
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .profil-section img {
+            width: 140px;
+            height: 140px;
+        }
+
+        .pengalaman-section, .review-section {
+            padding: 1.5rem;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container container-profil">
-    <!-- Header Profil -->
-    <div class="profil-header">
-        <img src="{{ tukang['foto'] }}" alt="Foto Tukang">
-        <div class="profil-info">
-            <h2>{{ tukang['nama'] }}</h2>
-            <p>{{ tukang['keahlian'] }}</p>
+<!-- PROFIL HEADER -->
+<section class="profil-section">
+    <img src="https://pengadaan.or.id/wp-content/uploads/2023/10/tukang-bangunan-1.jpg" alt="Foto Tukang">
+    <div class="profil-info">
+        <h2>Ahmad Imam</h2>
+        <p><strong>Keahlian:</strong> Tukang bangunan, kontruksi pondasi, eksterior, renovasi</p>
+        <div class="profil-rating">
+            {% set rating = 4 %}
+            {% for i in range(5) %}
+                {% if i < rating %}
+                    <i class="fas fa-star star-icon"></i>
+                {% else %}
+                    <i class="fas fa-star star-icon inactive"></i>
+                {% endif %}
+            {% endfor %}
+            <span>4.3 dari 5 (50 pengguna)</span>
+        </div>
+    </div>
+</section>
+
+<!-- PENGALAMAN -->
+<section class="pengalaman-section">
+    <h3>Pengalaman</h3>
+    <ul>
+        <li>Pembangunan Rumah</li>
+        <li>Renovasi Rumah</li>
+        <li>Pekerjaan Eksterior</li>
+        <li>Pembangunan Kolam Renang</li>
+    </ul>
+</section>
+
+<!-- REVIEW -->
+<section class="review-section">
+    <div class="review-title">Ulasan Pengguna</div>
+    <div class="review-header">
+        <span>⭐ 4.9 / 5</span>
+        <span>50 Pengguna</span>
+    </div>
+
+    <div class="review-item">
+        <img src="https://placehold.co/55x55" alt="Reviewer">
+        <div class="review-content">
+            <p><strong>Aufa</strong></p>
             <div>
-                {% set rating = tukang['rating']|round(0, 'floor') %}
-                {% for i in range(5) %}
-                    {% if i < rating %}
-                        <i class="fas fa-star star-icon"></i>
-                    {% else %}
-                        <i class="fas fa-star star-icon inactive"></i>
-                    {% endif %}
-                {% endfor %}
-                <span>({{ tukang['jumlah_review'] }} review)</span>
+                <i class="fas fa-star star-icon"></i>
+                <i class="fas fa-star star-icon"></i>
+                <i class="fas fa-star star-icon"></i>
+                <i class="fas fa-star star-icon"></i>
+                <i class="fas fa-star star-icon"></i>
             </div>
+            <p>Tekun, pekerjaannya cepat dan rapi.</p>
         </div>
     </div>
 
-    <div class="pengalaman">
-        <strong>Pengalaman:</strong> {{ tukang['pengalaman'] }}
-    </div>
-
-    <div class="review-container">
-        <div class="review-summary">
-            <span>Total Rating: {{ tukang['rating'] }}</span> | 
-            <span>Jumlah Reviewer: {{ tukang['jumlah_review'] }}</span>
-        </div>
-
-        {% set contoh_reviews = [
-            {'nama':'Andi', 'foto':'https://placehold.co/50x50', 'rating':5, 'komentar':'Pelayanan sangat bagus!'},
-            {'nama':'Sari', 'foto':'https://placehold.co/50x50', 'rating':4, 'komentar':'Pekerjaan rapi dan cepat.'}
-        ] %}
-
-        {% for review in contoh_reviews %}
-        <div class="review-item">
-            <img src="{{ review['foto'] }}" alt="Foto Reviewer">
-            <div class="review-content">
-                <p><strong>{{ review['nama'] }}</strong></p>
-                <div>
-                    {% for i in range(5) %}
-                        {% if i < review['rating'] %}
-                            <i class="fas fa-star star-icon"></i>
-                        {% else %}
-                            <i class="fas fa-star star-icon inactive"></i>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-                <p>{{ review['komentar'] }}</p>
+    <div class="review-item">
+        <img src="https://placehold.co/55x55" alt="Reviewer">
+        <div class="review-content">
+            <p><strong>Budi</strong></p>
+            <div>
+                <i class="fas fa-star star-icon"></i>
+                <i class="fas fa-star star-icon"></i>
+                <i class="fas fa-star star-icon"></i>
+                <i class="fas fa-star star-icon"></i>
+                <i class="fas fa-star star-icon inactive"></i>
             </div>
+            <p>Pekerjaan sesuai permintaan dan hasil sangat bagus.</p>
         </div>
-        {% endfor %}
     </div>
-</div>
+</section>
 {% endblock %}
