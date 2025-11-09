@@ -1,115 +1,106 @@
 from flask import (
     Flask, render_template, redirect, url_for,
-    request, session, flash, get_flashed_messages
+    request, session, flash, get_flashed_messages,
 )
+import mysql.connector 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'kunci-rahasia-teman-tukang-yang-kuat'
 
-SIMULATED_ORDERS = {
-    101: {'layanan': 'Perbaikan Pipa Bocor', 'tukang': 'Ahmad Imam', 'tanggal': '15/10/2025', 'status': 'Menunggu'},
-    102: {'layanan': 'Pemasangan Keramik', 'tukang': 'Ibu Rina', 'tanggal': '01/11/2025', 'status': 'Selesai'},
-}
-
-SIMULATED_TUKANG = [
-    {"id": 1, "nama": "Budi Santoso", "keahlian": "Pengecatan & Plafon",
-     "rating": 4.8, "jumlah_review": 12, "pengalaman": "10 tahun pengalaman", "foto":"https://placehold.co/150x150"},
-    {"id": 2, "nama": "Siti Aminah", "keahlian": "Listrik & Instalasi",
-     "rating": 4.5, "jumlah_review": 8, "pengalaman": "7 tahun pengalaman", "foto":"https://placehold.co/150x150"},
-    {"id": 3, "nama": "Agus Wijaya", "keahlian": "Pemasangan Keramik",
-     "rating": 4.7, "jumlah_review": 10, "pengalaman": "5 tahun pengalaman", "foto":"https://placehold.co/150x150"},
-]
-
-dummy_user = {
-    "email": "dinda@gmail.com",
-    "password": "123456"
-}
-
-registered_users = []
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="",
+    database="capstone_web"
+)
+cursor = db.cursor(dictionary=True)
 
 @app.route('/')
 def index():
-    return redirect(url_for('dashboard')) if 'user' in session else redirect(url_for('login'))
+    return redirect(url_for('dashboard'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-
-        email = request.form.get('email')
+        email    = request.form.get('email')
         password = request.form.get('password')
 
-        if email == dummy_user["email"] and password == dummy_user["password"]:
-            session['user'] = email
-            return redirect(url_for('dashboard'))
-        else:
-            flash("Email atau password salah!", "danger")
+        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = cursor.fetchone()
+
+        if not user:
+            flash("Email tidak terdaftar!", "danger")
             return redirect(url_for('login'))
+        
+        elif user['password'] != password:
+            flash("Password salah!", "danger")
+            return redirect(url_for('login'))
+        
+        else:
+            session['user_id']    = user['id_user']
+            session['user_email'] = user['email']
+            session['user_role']  = user['role']
+            flash("Login berhasil!", "success")
+            return redirect(url_for('dashboard'))
 
     return render_template('login.html')
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET','POST'])
 def register():
     if request.method == 'POST':
+        username = request.form['username']
+        email    = request.form['email']
+        password = request.form['password']
 
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
-
-        if not username or not email or not password:
-            flash("Semua form harus diisi!", "danger")
+        if len(password) < 6 or len(password) > 8:
+            flash("Password harus 6-8 karakter!", "danger")
             return redirect(url_for('register'))
-
-        if len(password) < 6:
-            flash("Password minimal 6 karakter!", "danger")
-            return redirect(url_for('register'))
-
-        registered_users.append({
-            "username": username,
-            "email": email,
-            "password": password
-        })
+        
+        cur = db.cursor()
+        cur.execute(
+            "INSERT INTO users (username, email, password, role) VALUES (%s, %s, %s, 'customer')",
+            (username, email, password)
+        )
+        db.commit()
 
         flash("Registrasi berhasil! Silakan login.", "success")
         return redirect(url_for('login'))
 
     return render_template('register.html')
+
 @app.route('/dashboard')
 def dashboard():
-    if 'user' not in session:
-        flash("Anda harus login untuk mengakses dashboard.")
-        return redirect(url_for('login'))
-    
-    return render_template(
-        'dashboard.html', 
-        user=session.get('user'), 
-        active_page='dashboard'
-    )
+    return render_template('dashboard.html')
 
 @app.route('/riwayat-pesanan')
 def riwayat_pesanan():
-    if 'user' not in session:
-        flash("Anda harus login untuk melihat riwayat pesanan.")
+    if 'user_id' not in session:  
+        flash("Anda harus login untuk melihat riwayat pesanan.", "warning")
         return redirect(url_for('login'))
     
+    simulated_orders = {
+        101: {'layanan': 'Perbaikan Pipa Bocor', 'tukang': 'Ahmad Imam', 'tanggal': '15/10/2025', 'status': 'Menunggu'},
+        102: {'layanan': 'Pemasangan Keramik', 'tukang': 'Ibu Rina', 'tanggal': '01/11/2025', 'status': 'Selesai'},
+    }
+
     return render_template(
         'riwayat_pesanan.html',
-        orders=SIMULATED_ORDERS,
+        orders=simulated_orders,
         active_page='riwayat_pesanan'
     )
 
 @app.route('/ulasan/<int:order_id>', methods=['GET', 'POST'])
 def tulis_ulasan(order_id):
     if request.method == 'POST':
-        flash("Ulasan berhasil dikirim!")
         return redirect(url_for('riwayat_pesanan'))
-
+    
     return render_template('tulis_ulasan.html', order_id=order_id)
 
 @app.route('/deteksi', methods=['GET', 'POST'])
 def deteksi():
     get_flashed_messages()
 
-    if 'user' not in session:
+    if 'user_id' not in session:
         flash("Anda harus login untuk menggunakan fitur deteksi.")
         return redirect(url_for('login'))
     
@@ -130,10 +121,6 @@ def deteksi():
 
 @app.route('/deteksi-hasil')
 def deteksi_hasil():
-    if 'user' not in session:
-        flash("Anda harus login untuk melihat hasil deteksi.")
-        return redirect(url_for('login'))
-    
     hasil = {
         'gambar_rusak': 'https://placehold.co/600x400/808080/FFFFFF?text=Dinding+Retak',
         'analisis': (
@@ -153,14 +140,37 @@ def deteksi_hasil():
 
 @app.route("/rekomendasi")
 def rekomendasi():
-    return render_template("rekomendasi.html", tukangs=SIMULATED_TUKANG)
+    simulated_tukang = [
+        {"id": 1, "nama": "Budi Santoso", "keahlian": "Pengecatan & Plafon",
+         "rating": 4.8, "jumlah_review": 12, "pengalaman": "10 tahun pengalaman",
+         "foto": "https://placehold.co/150x150"},
+        {"id": 2, "nama": "Siti Aminah", "keahlian": "Listrik & Instalasi",
+         "rating": 4.5, "jumlah_review": 8, "pengalaman": "7 tahun pengalaman",
+         "foto": "https://placehold.co/150x150"},
+        {"id": 3, "nama": "Agus Wijaya", "keahlian": "Pemasangan Keramik",
+         "rating": 4.7, "jumlah_review": 10, "pengalaman": "5 tahun pengalaman",
+         "foto": "https://placehold.co/150x150"},
+    ]
+    
+    return render_template("rekomendasi.html", tukangs=simulated_tukang)
 
 @app.route("/lihat-tukang/<int:tukang_id>")
 def lihat_tukang(tukang_id):
-    tukang = next((t for t in SIMULATED_TUKANG if t["id"] == tukang_id), None)
+    simulated_tukang = [
+        {"id": 1, "nama": "Budi Santoso", "keahlian": "Pengecatan & Plafon",
+         "rating": 4.8, "jumlah_review": 12, "pengalaman": "10 tahun pengalaman",
+         "foto": "https://placehold.co/150x150"},
+        {"id": 2, "nama": "Siti Aminah", "keahlian": "Listrik & Instalasi",
+         "rating": 4.5, "jumlah_review": 8, "pengalaman": "7 tahun pengalaman",
+         "foto": "https://placehold.co/150x150"},
+        {"id": 3, "nama": "Agus Wijaya", "keahlian": "Pemasangan Keramik",
+         "rating": 4.7, "jumlah_review": 10, "pengalaman": "5 tahun pengalaman",
+         "foto": "https://placehold.co/150x150"},
+    ]
+    tukang = next((t for t in simulated_tukang if t["id"] == tukang_id), None)
     
     if not tukang:
-        flash("Tukang tidak ditemukan.")
+        flash("Tukang tidak ditemukan.", "warning")
         return redirect(url_for("rekomendasi"))
     
     return render_template("lihat_tukang.html", tukang=tukang)

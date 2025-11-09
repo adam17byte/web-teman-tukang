@@ -13,15 +13,13 @@
 
    .chat-wrapper {
     display: flex;
-    height: calc(100vh - 70px); /* sesuaikan tinggi navbar kamu */
+    height: calc(100vh - 70px);
     width: 100%;
     background-color: #fff;
     margin: 0;
     padding: 0;
-}
+    }
 
-
-    /* === SIDEBAR === */
     .sidebar {
         width: 30%;
         background-color: #fff;
@@ -91,7 +89,6 @@
         color: #666;
     }
 
-    /* === AREA CHAT === */
     .chat-main {
         flex: 1;
         display: flex;
@@ -201,8 +198,6 @@
 
 {% block content %}
 <div class="chat-wrapper">
-
-    <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="sidebar-header">Chat</div>
         <div class="search-box">
@@ -227,7 +222,6 @@
         </div>
     </div>
 
-    <!-- AREA CHAT -->
     <div class="chat-main">
         <div class="chat-header">
             <img id="chatImage" src="https://pengadaan.or.id/wp-content/uploads/2023/10/tukang-bangunan-1.jpg" alt="Tukang">
