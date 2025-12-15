@@ -10,7 +10,8 @@ import numpy as np
 import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
+import pickle
+import joblib
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'kunci-rahasia-teman-tukang-yang-kuat'
@@ -51,6 +52,16 @@ analisis_faktor = {
     "Dinding Berjamur": "Dinding berjamur terjadi akibat kelembaban berlebih, ventilasi yang buruk, atau rembesan air yang terus-menerus, sehingga jamur berkembang di permukaan dinding.",
 }
 
+svm_model = joblib.load('model/svm_model.pkl')
+tfidf = joblib.load('model/tfidf_vectorizer.pkl')
+
+def predict_sentiment(text):
+    text_tfidf = tfidf.transform([text])
+    result = svm_model.predict(text_tfidf)[0]
+
+    return "positif" if result == 1 else "negatif"
+
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -59,6 +70,52 @@ def login_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
+
+@app.route('/api/review', methods=['POST'])
+def add_review():
+    try:
+        data = request.get_json()
+
+        user_id = data.get('user_id')
+        tukang_id = data.get('tukang_id')
+        review_text = data.get('review_text')
+        rating = data.get('rating')
+
+        if user_id is None or tukang_id is None or not review_text or rating is None:
+            return jsonify({"status": "error", "message": "Data tidak lengkap"}), 400
+
+        rating = int(rating)
+
+        sentiment = predict_sentiment(review_text)
+
+        cursor.execute("""
+            INSERT INTO review (user_id, tukang_id, review_text, sentiment, rating)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user_id, tukang_id, review_text, sentiment, rating))
+
+        cursor.execute("""
+            UPDATE tukang
+            SET 
+                rating = (
+                    SELECT IFNULL(AVG(rating), 0)
+                    FROM review WHERE tukang_id=%s
+                ),
+                jumlah_ulasan = (
+                    SELECT COUNT(*) FROM review WHERE tukang_id=%s
+                )
+            WHERE id_tukang=%s
+        """, (tukang_id, tukang_id, tukang_id))
+
+        db.commit()
+
+        return jsonify({
+            "status": "success",
+            "sentiment": sentiment
+        }), 201
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # --- ROUTES UTAMA ---
 @app.route('/')
@@ -189,9 +246,55 @@ def riwayat_pesanan():
     return render_template('riwayat_pesanan.html', orders=simulated_orders, active_page='riwayat_pesanan')
 
 @app.route('/ulasan/<int:order_id>', methods=['GET', 'POST'])
+@login_required
 def tulis_ulasan(order_id):
-    if request.method == 'POST':
+
+    # ambil order
+    cursor.execute(
+        "SELECT tukang_id FROM orders WHERE id_order=%s",
+        (order_id,)
+    )
+    order = cursor.fetchone()
+
+    if not order:
+        flash("Pesanan tidak ditemukan", "danger")
         return redirect(url_for('riwayat_pesanan'))
+
+    tukang_id = order['tukang_id']
+    user_id = session['user_id']
+
+    if request.method == 'POST':
+        rating = request.form['rating']
+        review_text = request.form['ulasan']
+
+        # 🔮 PREDIKSI SENTIMENT
+        sentiment = predict_sentiment(review_text)
+
+        # 💾 SIMPAN REVIEW
+        cursor.execute("""
+            INSERT INTO review (user_id, tukang_id, review_text, sentiment, rating)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user_id, tukang_id, review_text, sentiment, rating))
+
+        # ⭐ UPDATE RATING TUKANG
+        cursor.execute("""
+            UPDATE tukang
+            SET 
+                rating = (
+                    SELECT IFNULL(AVG(rating), 0)
+                    FROM review WHERE tukang_id=%s
+                ),
+                jumlah_ulasan = (
+                    SELECT COUNT(*) FROM review WHERE tukang_id=%s
+                )
+            WHERE id_tukang=%s
+        """, (tukang_id, tukang_id, tukang_id))
+
+        db.commit()
+
+        flash("Ulasan berhasil dikirim", "success")
+        return redirect(url_for('riwayat_pesanan'))
+
     return render_template('tulis_ulasan.html', order_id=order_id)
 
 @app.route('/deteksi', methods=['GET', 'POST'])
@@ -280,6 +383,43 @@ def lihat_tukang(tukang_id):
     # Jika pengalaman ada dan berbentuk string, ubah jadi list
     pengalaman_str = tukang.get("pengalaman", "")
     tukang["pengalaman"] = [x.strip() for x in pengalaman_str.split(",") if x.strip()]
+    cursor.execute("""
+        SELECT 
+            r.review_text,
+            r.rating,
+            r.sentiment,
+            u.username AS nama
+        FROM review r
+        JOIN users u ON r.user_id = u.id_users
+        WHERE r.tukang_id = %s
+        ORDER BY r.tanggal DESC
+    """, (tukang_id,))
+    
+    reviews = cursor.fetchall()
+
+    # ⭐ TAMBAHAN DI SINI ⭐
+    total_ulasan = len(reviews)
+    negatif = sum(1 for r in reviews if r["sentiment"] == "negatif")
+
+    persentase_negatif = 0
+    if total_ulasan > 0:
+        persentase_negatif = round((negatif / total_ulasan) * 100)
+
+    tukang["persentase_negatif"] = persentase_negatif
+    tukang["total_ulasan"] = total_ulasan
+    # ⭐ SAMPAI SINI ⭐
+
+    # Format untuk template
+    tukang["ulasan"] = [
+        {
+            "nama": r["nama"],
+            "rating": r["rating"],
+            "komentar": r["review_text"],
+            "sentiment": r["sentiment"],
+            "foto": "https://placehold.co/55x55"
+        }
+        for r in reviews
+    ]
 
     return render_template("lihat_tukang.html", tukang=tukang)
 

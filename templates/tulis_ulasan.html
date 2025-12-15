@@ -88,8 +88,8 @@
 {% block content %}
 <div class="container review-container">
     <div class="review-box">
-        <form method="POST" action="{{ url_for('tulis_ulasan', order_id=order_id) }}">
-            <h2 class="review-title">Beri Rating & Ulasan</h2>
+       <form method="POST" action="{{ url_for('tulis_ulasan_web', order_id=order_id) }}">
+
             <p class="mb-2" style="color:#555; font-size:0.95rem;">Penilaian Anda untuk tukang ini</p>
 
             <div class="rating-stars mb-3">

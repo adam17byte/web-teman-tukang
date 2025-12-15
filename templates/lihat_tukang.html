@@ -132,6 +132,15 @@
         color: #444;
     }
 
+    .text-danger {
+        color: #dc3545;
+    }
+
+    .text-success {
+        color: #28a745;
+    }
+
+
     @media (max-width: 768px) {
         .profil-section {
             flex-direction: column;
@@ -144,7 +153,8 @@
             height: 140px;
         }
 
-        .pengalaman-section, .review-section {
+        .pengalaman-section,
+        .review-section {
             padding: 1.5rem;
         }
     }
@@ -160,13 +170,12 @@
         <div class="profil-rating">
             {% set rating = tukang.rating|default(4) %}
             {% for i in range(5) %}
-                {% if i < rating %}
-                    <i class="fas fa-star star-icon"></i>
+            {% if i < rating %} <i class="fas fa-star star-icon"></i>
                 {% else %}
-                    <i class="fas fa-star star-icon inactive"></i>
+                <i class="fas fa-star star-icon inactive"></i>
                 {% endif %}
-            {% endfor %}
-            <span>{{ tukang.rating|default(4) }} dari 5 </span>
+                {% endfor %}
+                <span>{{ tukang.rating|default(4) }} dari 5 </span>
         </div>
     </div>
 </section>
@@ -188,7 +197,13 @@
     <div class="review-title">Ulasan Pengguna</div>
     <div class="review-header">
         <span>⭐ {{ tukang.rating|default(4) }} / 5</span>
+
+        <span class="{% if tukang.persentase_negatif > 30 %}text-danger{% else %}text-success{% endif %}">
+            {{ tukang.persentase_negatif }}% ulasan negatif
+        </span>
+
     </div>
+
 
     {% for review in tukang.ulasan %}
     <div class="review-item">
@@ -197,12 +212,11 @@
             <p><strong>{{ review.nama }}</strong></p>
             <div>
                 {% for i in range(5) %}
-                    {% if i < review.rating %}
-                        <i class="fas fa-star star-icon"></i>
+                {% if i < review.rating %} <i class="fas fa-star star-icon"></i>
                     {% else %}
-                        <i class="fas fa-star star-icon inactive"></i>
+                    <i class="fas fa-star star-icon inactive"></i>
                     {% endif %}
-                {% endfor %}
+                    {% endfor %}
             </div>
             <p>{{ review.komentar }}</p>
         </div>
