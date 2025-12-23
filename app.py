@@ -10,9 +10,24 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 import joblib
+from flask_cors import CORS
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from flask_bcrypt import Bcrypt
+from flask_jwt_extended import (
+    JWTManager, create_access_token,
+    jwt_required, get_jwt_identity
+)
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'kunci-rahasia-teman-tukang-yang-kuat'
+GOOGLE_CLIENT_ID = "240598274854-fvn01rhgje8ab3li5pfmpopgmqb5scfa.apps.googleusercontent.com"
+app.config['JWT_SECRET_KEY'] = 'jwt-rahasia-teman-tukang'
+jwt = JWTManager(app)
+
+CORS(app)
+bcrypt = Bcrypt(app)
 
 db = mysql.connector.connect(
     host="localhost",
@@ -64,40 +79,146 @@ vectorizer = TfidfVectorizer()
 TFIDF_MATRIX = vectorizer.fit_transform(dokumen_tukang)
 
 print("TF-IDF tukang berhasil di-load (cached)")
+# api login google
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email or not password:
+        return jsonify({"error": "Email dan password wajib"}), 400
+
+    cursor.execute("""
+        SELECT * FROM users
+        WHERE email=%s AND role='customer' AND auth_provider='local'
+    """, (email,))
+    user = cursor.fetchone()
+
+    if not user:
+        return jsonify({"error": "User tidak ditemukan"}), 404
+
+    if not bcrypt.check_password_hash(user['password'], password):
+        return jsonify({"error": "Password salah"}), 401
+
+    access_token = create_access_token(identity=user['id_users'])
+
+    return jsonify({
+    "access_token": access_token,
+    "user": {
+        "id": user["id_users"],
+        "username": user["username"],
+        "email": user["email"]
+    }
+})
+@app.route('/api/register', methods=['POST'])
+def api_register():
+    data = request.get_json()
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
+
+    if not username or not email or not password:
+        return jsonify({"error": "Data tidak lengkap"}), 400
+
+    cursor.execute("SELECT id_users FROM users WHERE email=%s", (email,))
+    if cursor.fetchone():
+        return jsonify({"error": "Email sudah terdaftar"}), 409
+
+    hashed = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    cursor.execute("""
+        INSERT INTO users (username, email, password, role, auth_provider)
+        VALUES (%s,%s,%s,'customer','local')
+    """, (username, email, hashed))
+    db.commit()
+
+    return jsonify({"message": "Register berhasil"}), 201
+@app.route('/api/auth/google', methods=['POST'])
+def api_login_google():
+    token = request.json.get('id_token')
+
+    if not token:
+        return jsonify({"error": "id_token wajib"}), 400
+
+    try:
+        idinfo = id_token.verify_oauth2_token(
+            token,
+            requests.Request(),
+            GOOGLE_CLIENT_ID
+        )
+
+        google_id = idinfo['sub']
+        email = idinfo['email']
+        username = idinfo.get('name', email.split('@')[0])
+
+        cursor.execute("""
+            SELECT * FROM users
+            WHERE google_id=%s AND role='customer' AND auth_provider='google'
+        """, (google_id,))
+        user = cursor.fetchone()
+
+        if not user:
+            cursor.execute("""
+                INSERT INTO users
+                (username, email, password, role, auth_provider, google_id)
+                VALUES (%s,%s,NULL,'customer','google',%s)
+            """, (username, email, google_id))
+            db.commit()
+
+            cursor.execute(
+                "SELECT * FROM users WHERE google_id=%s",
+                (google_id,)
+            )
+            user = cursor.fetchone()
+
+        access_token = create_access_token(identity=user['id_users'])
+
+        return jsonify({
+            "access_token": access_token,
+            "user": {
+                "id": user["id_users"],
+                "username": user["username"],
+                "email": user["email"]
+            }
+        }), 200
+
+    except ValueError:
+        return jsonify({"error": "Token Google tidak valid"}), 401
 
 # api 
-@app.route("/api/rekomendasi")
+@app.route("/api/rekomendasi", methods=["POST"])
+@jwt_required()
 def api_rekomendasi():
-    jenis_kerusakan = request.args.get('jenis', None)
-
-    if not jenis_kerusakan:
-        return jsonify({"status": "error", "message": "Jenis kerusakan tidak ditemukan"}), 400
+    data = request.get_json()
+    jenis_kerusakan = data["jenis_kerusakan"]
 
     query_vec = vectorizer.transform([jenis_kerusakan])
     sim_scores = cosine_similarity(query_vec, TFIDF_MATRIX).flatten()
 
-    rekomendasi_list = []
+    rekomendasi = []
     for i, t in enumerate(TUKANG_DATA):
         if sim_scores[i] >= 0.1:
-            rekomendasi_list.append({
+            rekomendasi.append({
                 "id_tukang": t["id_tukang"],
                 "nama": t["nama"],
                 "keahlian": t["keahlian"],
                 "pengalaman": t["pengalaman"],
-                "foto": t.get("foto", "https://placehold.co/80x80"),
-                "similarity": float(sim_scores[i])
+                "rating": t.get("rating", 0),
+                "foto": t.get("foto", "")
             })
 
-    rekomendasi_list = sorted(rekomendasi_list, key=lambda x: x["similarity"], reverse=True)
-
-    return jsonify({"status": "success", "rekomendasi": rekomendasi_list})
+    return jsonify({
+        "status": "success",
+        "data": rekomendasi
+    })
 
 @app.route('/api/review', methods=['POST'])
+@jwt_required()
 def add_review():
     try:
         data = request.get_json()
-
-        user_id = data.get('user_id')
+        user_id = get_jwt_identity()  
         tukang_id = data.get('tukang_id')
         review_text = data.get('review_text')
         rating = data.get('rating')
@@ -145,9 +266,11 @@ def admin_dashboard():
         flash("Akses ditolak!", "danger")
         return redirect(url_for('login_admin'))
 
+    # total tukang
     cursor.execute("SELECT COUNT(*) AS total FROM tukang")
     total_tukang = cursor.fetchone()['total']
-    
+
+    # total customer
     cursor.execute("""
         SELECT COUNT(*) AS total
         FROM users
@@ -155,10 +278,33 @@ def admin_dashboard():
     """)
     total_customer = cursor.fetchone()['total']
 
+    # rata-rata rating tukang
+    cursor.execute("""
+        SELECT IFNULL(ROUND(AVG(rating),1),0) AS avg_rating
+        FROM review
+    """)
+    avg_rating = cursor.fetchone()['avg_rating']
+
+    # jumlah rating per bintang
+    rating_counts = {}
+    for i in range(1, 6):
+        cursor.execute("""
+            SELECT COUNT(*) AS total
+            FROM review
+            WHERE rating=%s
+        """, (i,))
+        rating_counts[i] = cursor.fetchone()['total']
+
     return render_template(
         'admin/admin_dashboard.html',
         total_tukang=total_tukang,
-        total_customer=total_customer
+        total_customer=total_customer,
+        avg_rating=avg_rating,
+        rating_1=rating_counts[1],
+        rating_2=rating_counts[2],
+        rating_3=rating_counts[3],
+        rating_4=rating_counts[4],
+        rating_5=rating_counts[5]
     )
 
 @app.route('/login/admin', methods=['GET', 'POST'])
@@ -320,6 +466,25 @@ def delete_tukang(id):
     db.commit()
     flash("Tukang berhasil dihapus","success")
     return redirect('/admin/tukang')
+# route review tukang 
+@app.route('/admin/review')
+def review():
+    cursor.execute("""
+        SELECT 
+            r.review_text,
+            r.rating,
+            r.sentiment,
+            r.tanggal,
+            u.username AS customer,
+            t.nama AS tukang
+        FROM review r
+        JOIN users u ON r.user_id = u.id_users
+        JOIN tukang t ON r.tukang_id = t.id_tukang
+        ORDER BY r.tanggal DESC
+    """)
+    reviews = cursor.fetchall()
+
+    return render_template('admin/review.html', reviews=reviews)
 
 # route tampilan customer
 @app.route('/')
@@ -625,4 +790,5 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
+
