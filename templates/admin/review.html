@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Review Tukang - Admin Teman Tukang</title>
-
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_temantukang.png') }}" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
     <style>
@@ -32,6 +32,7 @@
         .sidebar-header {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 12px;
             padding: 20px;
             font-weight: 700;
@@ -202,8 +203,7 @@
 <body>
 
     <div class="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-tools"></i> Admin Teman Tukang
+        <div class="sidebar-header">Admin Teman Tukang
         </div>
         <a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <a href="/admin/akun_tukang"><i class="fas fa-user-cog"></i> Kelola Tukang</a>
@@ -214,10 +214,11 @@
     </div>
 
     <div class="navbar">
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search review...">
-            <button><i class="fas fa-search"></i></button>
-        </div>
+        <form method="get" action="{{ url_for('list_review_route') }}" class="search-box">
+            <input type="text" name="q" placeholder="Search review..." value="{{ keyword }}">
+            <button type="submit"><i class="fas fa-search"></i></button>
+        </form>
+
 
         <div class="nav-right">
             <div class="profile-menu">

@@ -5,15 +5,26 @@ from flask import (
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from db import db, cursor
-from api import api
+from flask_socketio import SocketIO
+from api import api, bcrypt 
+import os
+from werkzeug.utils import secure_filename
+
 
 app = Flask(__name__)
+UPLOAD_FOLDER = 'static/uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = 'kunci-rahasia-teman-tukang-yang-kuat'
 app.config['JWT_SECRET_KEY'] = 'jwt-rahasia-teman-tukang'
+
+socketio = SocketIO(app, cors_allowed_origins="*")
+import socket_chat
 
 CORS(app)
 JWTManager(app)
 app.register_blueprint(api)
+bcrypt.init_app(app)
 
 class Admin:
     def __init__(self, db_cursor):
@@ -56,9 +67,19 @@ class KelolaTukang:
     def __init__(self, db_cursor):
         self.cursor = db_cursor
 
-    def list_akun(self):
-        self.cursor.execute("SELECT * FROM users WHERE role='tukang'")
+    def list_akun(self, keyword=None):
+        if keyword:
+            self.cursor.execute("""
+                SELECT * FROM users 
+                WHERE role='tukang'
+                AND (username LIKE %s OR email LIKE %s)
+            """, (f"%{keyword}%", f"%{keyword}%"))
+        else:
+            self.cursor.execute(
+                "SELECT * FROM users WHERE role='tukang'"
+            )
         return self.cursor.fetchall()
+
 
     def add_akun(self, username, email, password):
         self.cursor.execute(
@@ -82,8 +103,15 @@ class Customer:
     def __init__(self, db_cursor):
         self.cursor = db_cursor
 
-    def list_customers(self):
-        self.cursor.execute("SELECT * FROM users WHERE role='customer'")
+    def list_customers(self, keyword=None):
+        if keyword:
+            self.cursor.execute("""
+            SELECT * FROM users
+            WHERE role='customer'
+            AND (username LIKE %s OR email LIKE %s)
+        """, (f"%{keyword}%", f"%{keyword}%"))
+        else:
+            self.cursor.execute("SELECT * FROM users WHERE role='customer'")
         return self.cursor.fetchall()
 
     def add_customer(self, username, email, password):
@@ -108,31 +136,42 @@ class DetailTukang:
     def __init__(self, db_cursor):
         self.cursor = db_cursor
 
-    def list_tukang(self):
-        self.cursor.execute("SELECT * FROM tukang")
+    def list_tukang(self, keyword=None):
+        if keyword:
+            self.cursor.execute("""
+            SELECT * FROM tukang
+            WHERE nama LIKE %s OR keahlian LIKE %s
+        """, (f"%{keyword}%", f"%{keyword}%"))
+        else:
+            self.cursor.execute("SELECT * FROM tukang")
         return self.cursor.fetchall()
 
-    def add_tukang(self, nama, keahlian, pengalaman, foto):
-        self.cursor.execute("INSERT INTO users (username, role) VALUES (%s,'tukang')", (nama,))
-        db.commit()
-        id_users = self.cursor.lastrowid
+
+    def add_tukang(self, id_users, nama, keahlian, pengalaman, foto):
         self.cursor.execute(
-            "INSERT INTO tukang (id_users,nama,keahlian,pengalaman,foto) VALUES (%s,%s,%s,%s,%s)",
+            """
+            INSERT INTO tukang 
             (id_users, nama, keahlian, pengalaman, foto)
-        )
+            VALUES (%s,%s,%s,%s,%s,%s)
+            """,
+            (id_users, nama, keahlian, pengalaman, foto)
+    )
         db.commit()
 
-    def edit_tukang(self, id_tukang, nama, keahlian, pengalaman, foto):
-        self.cursor.execute(
-            "UPDATE tukang SET nama=%s, keahlian=%s, pengalaman=%s, foto=%s WHERE id_tukang=%s",
-            (nama, keahlian, pengalaman, foto, id_tukang)
-        )
+
+    def edit_tukang(self, id, nama, keahlian, pengalaman, foto):
+        self.cursor.execute("""
+        UPDATE tukang SET
+        nama=%s,
+        keahlian=%s,
+        pengalaman=%s,
+        foto=%s
+        WHERE id_tukang=%s
+    """, (nama, keahlian, pengalaman, foto, id))
         db.commit()
 
     def delete_tukang(self, id_tukang):
-        self.cursor.execute("SELECT id_users FROM tukang WHERE id_tukang=%s", (id_tukang,))
-        data = self.cursor.fetchone()
-        self.cursor.execute("DELETE FROM users WHERE id_users=%s", (data['id_users'],))
+        self.cursor.execute("DELETE FROM tukang WHERE id_tukang=%s", (id_tukang,))
         db.commit()
 
 class Review:
@@ -203,7 +242,8 @@ def admin_dashboard_route():
 # Kelola Tukang
 @app.route('/admin/akun_tukang')
 def list_akun_tukang_route():
-    akun_tukang = tukang_obj.list_akun()
+    keyword = request.args.get('q')
+    akun_tukang = tukang_obj.list_akun(keyword)
     return render_template('admin/akun_tukang.html', akun_tukang=akun_tukang)
 
 @app.route('/admin/akun_tukang/add', methods=['GET','POST'])
@@ -236,8 +276,10 @@ def delete_akun_tukang_route(id):
 # Customer
 @app.route('/admin/customers')
 def list_customers_route():
-    customers = customer_obj.list_customers()
+    keyword = request.args.get('q')
+    customers = customer_obj.list_customers(keyword)
     return render_template('admin/customers.html', customers=customers)
+
 
 @app.route('/admin/customers/add', methods=['GET','POST'])
 def add_customer_route():
@@ -268,32 +310,69 @@ def delete_customer_route(id):
 # Detail Tukang
 @app.route('/admin/tukang')
 def list_detail_tukang_route():
-    tukang = detail_tukang_obj.list_tukang()
+    keyword = request.args.get('keyword')  
+    tukang = detail_tukang_obj.list_tukang(keyword)
     return render_template('admin/tukang.html', tukang=tukang)
 
-@app.route('/admin/tukang/add', methods=['GET','POST'])
-def add_detail_tukang_route():
+@app.route('/admin/tukang/add', methods=['GET', 'POST'])
+def tambah_tukang():
     if request.method == 'POST':
-        detail_tukang_obj.add_tukang(
-            request.form['nama'], request.form['keahlian'],
-            request.form['pengalaman'], request.form['foto']
-        )
-        flash("Tukang berhasil ditambahkan", "success")
-        return redirect(url_for('list_detail_tukang_route'))
-    return render_template('admin/add_tukang.html')
 
-@app.route('/admin/tukang/edit/<int:id>', methods=['GET','POST'])
-def edit_detail_tukang_route(id):
+        foto = request.files.get('foto')
+        if not foto or foto.filename == '':
+            flash("Foto wajib diupload", "danger")
+            return redirect(request.url)
+
+        id_users = request.form['id_users']
+        nama = request.form['nama']
+        keahlian = request.form['keahlian']
+        pengalaman = request.form['pengalaman']
+
+        filename = secure_filename(foto.filename)
+        foto.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        detail_tukang_obj.add_tukang(
+        id_users, nama, keahlian, pengalaman, filename
+    )
+
+        flash("Tukang berhasil ditambahkan", "success")
+        return redirect('/admin/tukang')
+
+    # GET
+    cursor.execute("SELECT id_users, username FROM users WHERE role='tukang'")
+    akun_tukang = cursor.fetchall()
+    return render_template('admin/add_tukang.html', akun_tukang=akun_tukang)
+
+@app.route("/admin/tukang/edit/<int:id>", methods=["GET", "POST"])
+def edit_tukang(id):
     cursor.execute("SELECT * FROM tukang WHERE id_tukang=%s", (id,))
     t = cursor.fetchone()
-    if request.method == 'POST':
+
+    if not t:
+        flash("Data tukang tidak ditemukan", "danger")
+        return redirect("/admin/tukang")
+
+    if request.method == "POST":
+        nama = request.form['nama']
+        keahlian = request.form['keahlian']
+        pengalaman = request.form['pengalaman']
+
+        foto = request.files.get('foto')
+
+        if foto and foto.filename != '':
+            filename = secure_filename(foto.filename)
+            foto.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        else:
+            filename = t['foto']
+
         detail_tukang_obj.edit_tukang(
-            id, request.form['nama'], request.form['keahlian'],
-            request.form['pengalaman'], request.form['foto']
+            id, nama, keahlian, pengalaman, filename
         )
-        flash("Tukang berhasil diupdate", "success")
-        return redirect(url_for('list_detail_tukang_route'))
-    return render_template('admin/edit_tukang.html', t=t)
+
+        flash("Data tukang berhasil diperbarui", "success")
+        return redirect("/admin/tukang")
+
+    return render_template("admin/edit_tukang.html", t=t)
 
 @app.route('/admin/tukang/delete/<int:id>')
 def delete_detail_tukang_route(id):
@@ -304,8 +383,30 @@ def delete_detail_tukang_route(id):
 # Review
 @app.route('/admin/review')
 def list_review_route():
-    reviews = review_obj.list_review()
-    return render_template('admin/review.html', reviews=reviews)
+    keyword = request.args.get('q', '').strip()  
+    if keyword:
+        cursor.execute("""
+            SELECT r.review_text, r.rating, r.sentiment, r.tanggal,
+                   u.username AS customer, t.nama AS tukang
+            FROM review r
+            JOIN users u ON r.user_id = u.id_users
+            JOIN tukang t ON r.tukang_id = t.id_tukang
+            WHERE r.review_text LIKE %s
+               OR u.username LIKE %s
+               OR t.nama LIKE %s
+            ORDER BY r.tanggal DESC
+        """, (f"%{keyword}%", f"%{keyword}%", f"%{keyword}%"))
+    else:
+        cursor.execute("""
+            SELECT r.review_text, r.rating, r.sentiment, r.tanggal,
+                   u.username AS customer, t.nama AS tukang
+            FROM review r
+            JOIN users u ON r.user_id = u.id_users
+            JOIN tukang t ON r.tukang_id = t.id_tukang
+            ORDER BY r.tanggal DESC
+        """)
+    reviews = cursor.fetchall()
+    return render_template('admin/review.html', reviews=reviews, keyword=keyword)
 
 # WebPromosi
 @app.route('/')
@@ -320,4 +421,5 @@ def log_request():
         print("BODY:", request.get_data())
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+

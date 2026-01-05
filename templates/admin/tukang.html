@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Kelola Tukang - Admin Teman Tukang</title>
-
+    <title>Detail Tukang - Admin Teman Tukang</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_temantukang.png') }}" />
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
@@ -33,6 +33,7 @@
         .sidebar-header {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 12px;
             padding: 20px;
             font-weight: 700;
@@ -230,7 +231,6 @@
 
     <div class="sidebar">
         <div class="sidebar-header">
-            <i class="fas fa-tools"></i>
             Admin Teman Tukang
         </div>
         <a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
@@ -243,10 +243,14 @@
 
     <!-- NAVBAR -->
     <div class="navbar">
-        <div class="search-box">
-            <input type="text" placeholder="Search for...">
-            <button><i class="fas fa-search"></i></button>
-        </div>
+        <form class="search-box" method="GET" action="/admin/tukang">
+            <input type="text" name="keyword" placeholder="Cari nama / keahlian..."
+                value="{{ request.args.get('keyword','') }}">
+            <button type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+
 
         <div class="nav-right">
             <div class="profile-menu">
@@ -272,7 +276,7 @@
     <div class="content">
 
         <div class="page-header">
-            <div class="page-title">Kelola Tukang</div>
+            <div class="page-title">Detail Tukang</div>
             <a href="/admin/tukang/add" class="btn-add">
                 <i class="fas fa-plus"></i> Tambah Tukang
             </a>
@@ -289,17 +293,24 @@
                     <th>Rating</th>
                     <th>Aksi</th>
                 </tr>
-
                 {% for t in tukang %}
                 <tr>
                     <td>{{ loop.index }}</td>
                     <td>{{ t.nama }}</td>
                     <td>{{ t.keahlian }}</td>
                     <td>{{ t.pengalaman }}</td>
+
                     <td>
-                        <img src="{{ t.foto }}" style="width:60px;height:60px;border-radius:8px;object-fit:cover;">
+                        {% if t.foto %}
+                        <img src="{{ url_for('static', filename='uploads/' + t.foto) }}" width="80" height="80"
+                            style="object-fit:cover;border-radius:8px;">
+                        {% else %}
+                        <span>-</span>
+                        {% endif %}
                     </td>
-                    <td>{{ t.rating }}</td>
+
+                    <td>0.00</td>
+
                     <td>
                         <div class="action-btns">
                             <a class="btn-edit" href="/admin/tukang/edit/{{ t.id_tukang }}">
@@ -313,6 +324,7 @@
                     </td>
                 </tr>
                 {% endfor %}
+
             </table>
         </div>
 

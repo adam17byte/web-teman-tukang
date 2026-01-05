@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Kelola Customer - Admin Teman Tukang</title>
-
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_temantukang.png') }}" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
     <style>
@@ -32,6 +32,7 @@
         .sidebar-header {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 12px;
             padding: 20px;
             font-weight: 700;
@@ -155,49 +156,53 @@
         .btn-add:hover {
             background: var(--hover);
         }
-/* TABLE */
-.table-box {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 0.15rem 1.75rem rgba(58, 59, 69, .15);
 
-    /* biar bisa scroll */
-    overflow-x: auto;
-    overflow-y: auto;
+        /* TABLE */
+        .table-box {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0.15rem 1.75rem rgba(58, 59, 69, .15);
 
-    /* tinggi maksimal tabel (scroll ke bawah) */
-    max-height: 520px;
-}
+            /* biar bisa scroll */
+            overflow-x: auto;
+            overflow-y: auto;
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 900px; /* supaya bisa geser kanan-kiri kalau layar kecil */
-}
+            /* tinggi maksimal tabel (scroll ke bawah) */
+            max-height: 520px;
+        }
 
-th {
-    background: var(--main);
-    padding: 14px;
-    color: white;
-    font-size: 14px;
-    text-align: left;
-    position: sticky;
-    top: 0;              /* header tetap saat scroll */
-    z-index: 2;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+            /* supaya bisa geser kanan-kiri kalau layar kecil */
+        }
 
-td {
-    padding: 14px;
-    border-bottom: 1px solid #eee;
-    font-size: 14px;
-    color: var(--text);
-    vertical-align: middle;
-    white-space: nowrap; /* biar kolom ga pecah */
-}
+        th {
+            background: var(--main);
+            padding: 14px;
+            color: white;
+            font-size: 14px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            /* header tetap saat scroll */
+            z-index: 2;
+        }
 
-tr:hover {
-    background: #fff7ec;
-}
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            color: var(--text);
+            vertical-align: middle;
+            white-space: nowrap;
+            /* biar kolom ga pecah */
+        }
+
+        tr:hover {
+            background: #fff7ec;
+        }
 
         /* ACTION */
         .action-btns {
@@ -231,8 +236,7 @@ tr:hover {
 <body>
 
     <div class="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-tools"></i> Admin Teman Tukang
+        <div class="sidebar-header">Admin Teman Tukang
         </div>
         <a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <a href="/admin/akun_tukang"><i class="fas fa-user-cog"></i> Kelola Tukang</a>
@@ -243,10 +247,11 @@ tr:hover {
     </div>
 
     <div class="navbar">
-        <div class="search-box">
-            <input type="text" placeholder="Search for...">
-            <button><i class="fas fa-search"></i></button>
-        </div>
+        <form class="search-box" method="GET" action="/admin/customers">
+            <input type="text" name="q" placeholder="Search for..." value="{{ request.args.get('q','') }}">
+            <button type="submit"><i class="fas fa-search"></i></button>
+        </form>
+
 
         <div class="profile-menu">
             <i class="fas fa-user-circle"></i>

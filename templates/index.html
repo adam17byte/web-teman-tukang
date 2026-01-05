@@ -2,11 +2,12 @@
 <html lang="id">
 
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Teman Tukang</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_temantukang.png') }}" />
 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <style>
     :root {
@@ -30,11 +31,9 @@
       overflow-x: hidden;
     }
 
-
     section {
-      padding: 100px 8%;
+      padding: 50px 8%;
     }
-
 
     h2 {
       font-size: 48px;
@@ -54,7 +53,7 @@
       width: 100%;
       background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(10px);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, .06);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
       z-index: 1000;
     }
 
@@ -82,7 +81,7 @@
       text-decoration: none;
       color: #333;
       font-weight: 500;
-      transition: .3s;
+      transition: 0.3s;
       position: relative;
     }
 
@@ -92,14 +91,14 @@
 
     /* underline animasi */
     .nav-menu a::after {
-      content: '';
+      content: "";
       position: absolute;
       bottom: -6px;
       left: 0;
       width: 0;
       height: 2px;
       background: var(--primary);
-      transition: .3s;
+      transition: 0.3s;
     }
 
     .nav-menu a:hover::after {
@@ -113,13 +112,7 @@
       padding: 10px 22px;
       border-radius: 30px;
       font-weight: bold;
-      transition: .3s;
-    }
-
-    .btn-download:hover {
-      background: #e67e00;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, .2);
+      transition: 0.3s;
     }
 
     /* responsive */
@@ -128,7 +121,6 @@
         display: none;
       }
     }
-
 
     /* ===== HERO ===== */
     .hero {
@@ -176,6 +168,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      perspective: 1200px;
     }
 
     /* BULATAN */
@@ -193,52 +186,42 @@
 
     /* HP */
     .phone {
-      width: 500px;
+      width: 750px;
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform-style: preserve-3d;
       z-index: 2;
     }
+@keyframes float-left {
+  0%, 100% {
+    transform: translate(-62%, -50%) rotateY(14deg);
+  }
+  50% {
+    transform: translate(-62%, -54%) rotateY(14deg);
+  }
+}
 
-    /* HP kiri */
-    @keyframes float-left {
-
-      0%,
-      100% {
-        transform: translateY(-50%) translateX(-75%) rotate(-4deg);
-      }
-
-      50% {
-        transform: translateY(-55%) translateX(-75%) rotate(-4deg);
-      }
-    }
 
     .phone-left {
       left: 50%;
-      transform: translate(-75%, -50%) rotate(-4deg);
-      animation: float-left 3s ease-in-out infinite;
+      transform: translate(-62%, -50%) rotateY(14deg);
+      animation: float-left 4s ease-in-out infinite;
     }
-
-    /* HP kanan */
-    @keyframes float-right {
-
-      0%,
-      100% {
-        transform: translateY(-55%) translateX(-25%) rotate(4deg);
-      }
-
-      50% {
-        transform: translateY(-50%) translateX(-25%) rotate(4deg);
-      }
-    }
+@keyframes float-right {
+  0%, 100% {
+    transform: translate(-38%, -50%) rotateY(-14deg);
+  }
+  50% {
+    transform: translate(-38%, -54%) rotateY(-14deg);
+  }
+}
 
     .phone-right {
       left: 50%;
-      transform: translate(-25%, -55%) rotate(4deg);
-      animation: float-right 3s ease-in-out infinite;
+      transform: translate(-38%, -50%) rotateY(-14deg);
+      animation: float-right 4s ease-in-out infinite;
     }
-
     /* bikin gambar nempel kiri */
     #fitur {
       padding-left: 0;
@@ -248,11 +231,8 @@
       width: 140%;
     }
 
-
-
     .fitur-style {
       background: #fffdf7;
-      padding: 120px 8%;
     }
 
     .fitur-wrap {
@@ -262,7 +242,6 @@
       gap: 80px;
     }
 
-
     /* kiri */
     .fitur-img img {
       width: 100%;
@@ -270,7 +249,6 @@
       object-fit: cover;
       border-radius: 0 80px 0 0;
       filter: brightness(0.75);
-
     }
 
     /* kanan */
@@ -282,7 +260,6 @@
     .fitur-title {
       margin-bottom: 24px;
     }
-
 
     .fitur-subtitle {
       position: relative;
@@ -333,10 +310,10 @@
       background: #fff4c4;
       padding: 36px;
       border-radius: 26px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, .1);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
       opacity: 0;
       transform: translateX(60px);
-      transition: .6s ease;
+      transition: 0.6s ease;
     }
 
     .fitur-card.active {
@@ -349,7 +326,6 @@
       color: #ff8c00;
       margin-bottom: 12px;
     }
-
 
     /* dots */
     .fitur-dots {
@@ -371,7 +347,7 @@
     }
 
     /* responsive */
-    @media(max-width:900px) {
+    @media (max-width: 900px) {
       .fitur-wrap {
         grid-template-columns: 1fr;
       }
@@ -398,76 +374,311 @@
       }
     }
 
-
-    .cara-card {
+    .cara-mockup {
       background: #fff;
-      padding: 38px 26px;
-      border-radius: 26px;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
-      transition: .3s;
     }
 
-    .cara-card i {
-      font-size: 38px;
-      color: var(--primary);
-      margin-bottom: 16px;
+    .cara-header h2 {
+      font-size: 48px;
+      /* sama dengan fitur */
+      font-weight: bold;
+      color: #333;
+      line-height: 1.2;
     }
 
-    .cara-card h3 {
-      font-size: 17px;
-      margin-bottom: 10px;
-    }
-
-    .cara-card p {
-      font-size: 14px;
-      color: #666;
-    }
-
-    .cara-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 18px 40px rgba(0, 0, 0, .14);
+    .mark {
+      background: #ff8c00;
+      color: #ffffff;
+      /* PUTIH */
+      padding: 5px;
+      border-radius: 10px;
+      font-family: inherit;
+      /* FONT SAMA */
+      font-weight: inherit;
+      /* UKURAN & TEBAL SAMA */
     }
 
 
-    /* ===== TUKANG ===== */
-    .tukang {
-      background: #fff;
+    .underline {
+      width: 100px;
+      height: 4px;
+      background: #ff8c00;
+      /* ORANGE UTAMA */
+      margin: 20px auto 16px;
+      border-radius: 2px;
     }
 
-    .tukang-grid {
-      margin-top: 60px;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
+
+    .mockup-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       gap: 30px;
     }
 
-    .tukang-card {
-      background: #fff;
-      padding: 36px;
-      border-radius: 26px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+    .hp-stack {
+      position: relative;
+      width: 760px;
+      height: 520px;
     }
+
+    .hp-mock {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      height: 460px;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: transform .45s cubic-bezier(.4, 0, .2, 1), opacity .3s;
+    }
+
+    /* posisi */
+    .hp-mock.active {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+      z-index: 10;
+    }
+
+    .hp-mock.l1 {
+      transform: translateX(-50%) translateX(-120px) scale(.97);
+      opacity: 1;
+      z-index: 7;
+    }
+
+    .hp-mock.l2 {
+      transform: translateX(-50%) translateX(-160px) scale(.94);
+      opacity: 1;
+      z-index: 6;
+    }
+
+    .hp-mock.l3 {
+      transform: translateX(-50%) translateX(-200px) scale(.91);
+      opacity: 1;
+      z-index: 5;
+    }
+
+    .hp-mock.r1 {
+      transform: translateX(-50%) translateX(120px) scale(.97);
+      opacity: 1;
+      z-index: 7;
+    }
+
+    .hp-mock.r2 {
+      transform: translateX(-50%) translateX(160px) scale(.94);
+      opacity: 1;
+      z-index: 6;
+    }
+
+    .hp-mock.r3 {
+      transform: translateX(-50%) translateX(200px) scale(.91);
+      opacity: 1;
+      z-index: 5;
+    }
+
+    /* card */
+    .step-card {
+      text-align: left;
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffcc00;
+      padding: 18px 20px;
+      width: 300px;
+      border-radius: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 14px 35px rgba(0, 0, 0, .18);
+      z-index: 20;
+    }
+
+    .step-card p {
+      font-size: 13px;
+      margin: 4px 0 0;
+      text-align: left;
+    }
+
+    .step-card span {
+      font-size: 22px;
+      font-weight: bold;
+      text-align: left;
+    }
+
+    .tukang-cta {
+      background: #fff7ee;
+      margin-top: 70px;
+    }
+
+    .tukang-cta-wrap {
+      max-width: 1100px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .tukang-img img {
+      width: 100%;
+      height: 360px;
+      object-fit: cover;
+      border-radius: 28px;
+    }
+
+    .tukang-text h2 {
+      font-size: 42px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .tukang-text h2 span {
+      color: var(--primary);
+    }
+
+    .tukang-text p {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 28px;
+      max-width: 420px;
+    }
+
+    .btn-tukang {
+      display: inline-block;
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 34px;
+      border-radius: 30px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: .3s;
+    }
+
+    .btn-tukang:hover {
+      background: #e67e00;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .15);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .tukang-cta-wrap {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .tukang-text p {
+        margin: auto auto 28px;
+      }
+    }
+
+    .testimoni {
+      background: #fff;
+      padding: 120px 8% 80px;
+      /* padding bawah lebih besar */
+    }
+
+    .testimoni-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .testimoni-sub {
+      color: #666;
+      font-size: 16px;
+    }
+
+
+    .testimoni h2 {
+      margin-bottom: 8px;
+    }
+
+    .testimoni-sub {
+      text-align: center;
+      color: #666;
+      font-size: 16px;
+    }
+
 
     .testimoni-wrapper {
       position: relative;
-      overflow: hidden;
+      max-width: 1200px;
+      margin: 60px auto 0;
+      padding: 0 60px 40px;
+      /* TAMBAH JARAK KE BAWAH */
+    }
+
+    .testimoni-mask {
+      overflow-x: hidden;
+      padding: 40px 40px 40px;
+      /* LEBARIN KIRI KANAN */
+      width: calc((280px * 3) + (20px * 2) + (40px * 2));
+      margin: 0 auto;
     }
 
     .testimoni-slider {
       display: flex;
       gap: 20px;
-      transition: transform .5s ease;
+      transition: transform 0.5s ease;
     }
 
+    /* ===== CARD ===== */
     .testi-card {
-      min-width: 320px;
+      min-width: 280px;
+      /* sebelumnya 320px */
+      max-width: 280px;
       background: #fff;
-      padding: 26px;
+      padding: 22px;
+      /* sedikit diperkecil */
       border-radius: 22px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
     }
 
+    /* CARD HOVER (MENONJOL) */
+    .testi-card:hover {
+      transform: scale(1.08);
+      box-shadow: 0 30px 120px 40px rgba(0, 0, 0, 0.12);
+      z-index: 3;
+    }
+
+    /* CARD LAIN REDUP SAAT HOVER */
+    .testimoni-slider:hover .testi-card:not(:hover) {
+      opacity: 0.5;
+    }
+
+    /* ===== PROFILE ===== */
+    .testi-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .testi-profile img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .testi-profile h3 {
+      font-size: 15px;
+      margin: 0;
+    }
+
+    .testi-profile span {
+      font-size: 13px;
+      color: #777;
+    }
+
+    /* ===== PANAH ===== */
     .nav-btn {
       position: absolute;
       top: 50%;
@@ -475,89 +686,135 @@
       background: #ff8c00;
       border: none;
       color: #fff;
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       cursor: pointer;
+      z-index: 5;
     }
 
     .nav-btn.left {
-      left: -10px;
+      left: 0;
     }
 
     .nav-btn.right {
-      right: -10px;
+      right: 0;
     }
 
-    .nav-btn:hover {
-      background: #e67e00;
+    .footer {
+      background: #24221f;
+      color: #fff;
+      padding: 80px 8% 40px;
+      position: relative;
     }
 
-    /* ===== DOWNLOAD ===== */
-    .download {
-      background: #fff7ee;
-      text-align: center;
+    .footer::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      opacity: 0.85;
+      background: repeating-linear-gradient(90deg,
+          #ffb400 0,
+          #ffb400 32px,
+          transparent 32px,
+          transparent 72px);
     }
 
-    .store-buttons {
-      margin-top: 40px;
+    .footer-wrap {
+      max-width: 750px;
+      /* ⬅️ KUNCI BIAR NGUMPUL */
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      /* ⬅️ LEBIH DEKET */
+      gap: 40px;
+      /* ⬅️ JARAK DIKECILIN */
+      align-items: center;
+    }
+
+    .footer-right {
       display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: flex-start;
+      /* ⬅️ JANGAN FLEX-END */
     }
 
-    .store-buttons img {
-      height: 55px;
+    .footer-logo {
+      height: 40px;
+      width: auto;
+      max-width: 160px;
+      object-fit: contain;
+      display: block;
+      margin-bottom: 20px;
+    }
+
+    .footer-left p {
+      color: #ddd;
+      font-size: 14px;
+      line-height: 1.7;
+      margin-bottom: 29px;
+      /* sebelumnya 24px */
+    }
+
+
+    .footer-store img {
+      height: 42px;
+      margin-right: 10px;
+    }
+
+    .footer-email {
+      background: linear-gradient(135deg, #ffb400, #ff8c00);
+      color: #111;
+      border-radius: 12px;
       transition: .3s;
+      display: inline-block;
+      padding: 14px 28px;
+      font-weight: bold;
+      text-decoration: none;
+      margin-bottom: 24px;
     }
 
-    .store-buttons img:hover {
-      transform: scale(1.05);
+    .footer-social {
+      margin-bottom: 16px;
+      color: #bbb;
+      font-size: 14px;
     }
 
-    /* ===== RESPONSIVE ===== */
-    @media(max-width:900px) {
-      .hero {
+    .footer-copy {
+      color: #888;
+      font-size: 13px;
+      margin-top: 8px;
+
+    }
+
+    /* responsive */
+    @media (max-width: 900px) {
+      .footer-wrap {
         grid-template-columns: 1fr;
         text-align: center;
       }
 
-      .hero-img {
-        margin-top: 40px;
-      }
-
-      .fitur-grid,
-      .cara-grid,
-      .tukang-grid,
-      .testimoni-grid {
-        grid-template-columns: 1fr;
-      }
-
-      h2 {
-        font-size: 36px;
-      }
-
-      .hero h1 {
-        font-size: 48px;
+      .footer-store img {
+        margin: 10px;
       }
     }
   </style>
 </head>
 
 <body>
-
   <nav class="navbar">
     <div class="nav-container">
       <div class="logo">
-        <img src="{{ url_for('static', filename='img/logo_temantukang.png') }}">
+        <img src="{{ url_for('static', filename='img/logo_temantukang.png') }}" />
       </div>
 
       <ul class="nav-menu">
         <li><a href="#beranda" class="active">Beranda</a></li>
         <li><a href="#fitur">Fitur</a></li>
         <li><a href="#cara">Cara Pesan</a></li>
-        <li><a href="#tukang">Tukang</a></li>
         <li><a href="#testimoni">Testimoni</a></li>
         <li>
           <a href="#download" class="btn-download">
@@ -568,50 +825,45 @@
     </div>
   </nav>
 
-
   <!-- HERO -->
   <section id="beranda" class="hero">
     <div>
       <span class="badge">Solusi Bangunan Modern</span>
       <h1>
-        Layanan<br>
-        Perbaikan<br>
-        <span class="highlight">Rumah</span><br>
+        Layanan<br />
+        Perbaikan<br />
+        <span class="highlight">Rumah</span><br />
         Terpercaya
       </h1>
       <p>
-        Teman Tukang membantu Anda menemukan tenaga ahli
-        terbaik untuk renovasi, perbaikan, dan perawatan rumah
-        dengan proses mudah dan transparan.
+        Teman Tukang membantu Anda menemukan tenaga ahli terbaik untuk
+        renovasi, perbaikan, dan perawatan rumah dengan proses mudah dan
+        transparan.
       </p>
     </div>
 
     <div class="hero-img">
       <div class="circle"></div>
 
-      <img src="{{ url_for('static', filename='img/HP.png') }}" class="phone phone-left">
-      <img src="{{ url_for('static', filename='img/hp 2.png') }}" class="phone phone-right">
+      <img src="{{ url_for('static', filename='img/deteksi.png') }}" class="phone phone-left" />
+      <img src="{{ url_for('static', filename='img/home1.png') }}" class="phone phone-right" />
     </div>
-
   </section>
 
   <section id="fitur" class="fitur-style">
     <div class="fitur-wrap">
-      
       <div class="fitur-img">
-        <img src="{{ url_for('static', filename='img/tukang.jpg') }}">
+        <img src="{{ url_for('static', filename='img/tukang.jpg') }}" />
       </div>
 
       <!-- KANAN -->
       <div class="fitur-area">
-
         <div class="fitur-title">
           <span class="fitur-subtitle">Fitur Unggulan</span>
           <h2>Solusi Pintar untuk Perbaikan Rumah</h2>
         </div>
 
         <div class="fitur-slider">
-
           <div class="fitur-card active">
             <i class="fa-solid fa-magnifying-glass-chart"></i>
             <h3>Deteksi Chat Otomatis</h3>
@@ -629,7 +881,6 @@
             <h3>Chat Langsung Tukang</h3>
             <p>Diskusi detail sebelum dan saat pengerjaan.</p>
           </div>
-
         </div>
 
         <div class="fitur-dots">
@@ -637,209 +888,157 @@
           <span class="dot"></span>
           <span class="dot"></span>
         </div>
-
       </div>
     </div>
   </section>
+  <section id="cara" class="cara-mockup">
+    <div class="cara-header">
+      <h2><span class="mark">Cara</span> Membuat<br />Pesanan</h2>
+      <div class="underline"></div>
+    </div>
 
+    <div class="mockup-wrapper">
 
+      <div class="hp-stack">
+        <img src="{{ url_for('static', filename='img/home.png') }}" class="hp-mock">
+        <img src="{{ url_for('static', filename='img/handphone.png') }}" class="hp-mock">
+        <img src="{{ url_for('static', filename='img/handphone.png') }}" class="hp-mock">
+        <img src="{{ url_for('static', filename='img/handphone.png') }}" class="hp-mock">
+        <img src="{{ url_for('static', filename='img/handphone.png') }}" class="hp-mock">
+        <img src="{{ url_for('static', filename='img/handphone.png') }}" class="hp-mock">
+        <img src="{{ url_for('static', filename='img/handphone.png') }}" class="hp-mock">
 
-  <!-- CARA PESAN -->
-  <section id="cara" class="cara">
-    <h2>Cara Memesan Tukang dengan Fitur Deteksi</h2>
+        <div class="step-card" onclick="nextStep()">
+          <div>
+            <strong id="stepTitle"></strong>
+            <p id="stepText"></p>
+          </div>
+          <span>→</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="tukang" class="tukang-cta">
+    <div class="tukang-cta-wrap">
 
-    <div class="cara-grid">
-
-      <div class="cara-card">
-        <i class="fa-solid fa-mobile-screen-button"></i>
-        <h3>Buka Fitur Deteksi</h3>
+      <!-- TEKS KIRI -->
+      <div class="tukang-text">
+        <h2>
+          Tukang <span>Terkualifikasi</span>
+        </h2>
         <p>
-          Masuk ke menu <b>Deteksi</b> pada aplikasi Teman Tukang
-          melalui smartphone Anda.
+          Dapatkan lebih banyak pelanggan dan pekerjaan rutin
+          bersama Teman Tukang.
         </p>
+
+        <a href="#daftar-tukang" class="btn-tukang">
+          Daftar sebagai Tukang
+        </a>
       </div>
 
-      <div class="cara-card">
-        <i class="fa-solid fa-camera"></i>
-        <h3>Unggah Foto Kerusakan</h3>
-        <p>
-          Ambil atau unggah foto area rumah yang mengalami
-          kerusakan untuk dianalisis sistem.
-        </p>
-      </div>
-
-      <div class="cara-card">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <h3>Proses Deteksi</h3>
-        <p>
-          Tekan tombol <b>Deteksi</b> dan tunggu sistem menganalisis
-          jenis serta tingkat kerusakan.
-        </p>
-      </div>
-
-      <div class="cara-card">
-        <i class="fa-solid fa-chart-line"></i>
-        <h3>Lihat Hasil Analisis</h3>
-        <p>
-          Aplikasi menampilkan hasil analisis kerusakan secara
-          jelas dan mudah dipahami.
-        </p>
-      </div>
-
-      <div class="cara-card">
-        <i class="fa-solid fa-user-gear"></i>
-        <h3>Rekomendasi Tukang</h3>
-        <p>
-          Sistem memberikan rekomendasi tukang yang sesuai
-          dengan hasil deteksi secara otomatis.
-        </p>
-      </div>
-
-      <div class="cara-card">
-        <i class="fa-solid fa-user"></i>
-        <h3>Pilih Tukang</h3>
-        <p>
-          Pilih tukang, lihat profil, pengalaman, dan ulasan
-          sebelum melanjutkan pemesanan.
-        </p>
-      </div>
-
-      <div class="cara-card">
-        <i class="fa-solid fa-cart-shopping"></i>
-        <h3>Pesan Sekarang</h3>
-        <p>
-          Tekan tombol <b>Pesan Sekarang</b> untuk memulai
-          proses pengerjaan.
-        </p>
+      <!-- GAMBAR KANAN -->
+      <div class="tukang-img">
+        <img src="{{ url_for('static', filename='img/tukangbangunan.jpg') }}" alt="Tukang Profesional">
       </div>
 
     </div>
   </section>
 
-  <!-- TUKANG -->
-  <section id="tukang" class="tukang">
-    <h2>Daftar Tukang</h2>
-    <div class="tukang-grid">
-      <div class="tukang-card">Tukang Bangunan</div>
-      <div class="tukang-card">Tukang Listrik</div>
-      <div class="tukang-card">Tukang Air</div>
-      <div class="tukang-card">Tukang Cat</div>
-    </div>
-  </section>
 
   <!-- TESTIMONI -->
   <section id="testimoni" class="testimoni">
-    <h2>Apa Kata Pengguna Teman Tukang</h2>
+    <div class="testimoni-header">
+      <h2>
+        Apa Kata <span class="mark">Pengguna</span>
+      </h2>
+      <div class="underline"></div>
+      <p class="testimoni-sub">
+        Cerita pengalaman nyata dari pelanggan kami
+      </p>
+    </div>
+
 
     <div class="testimoni-wrapper">
       <button class="nav-btn left" onclick="slideTesti(-1)">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
 
-      <div class="testimoni-slider" id="testiSlider">
-
-        <!-- 1 -->
-        <div class="testi-card">
-          <div class="testi-profile">
-            <img src="{{ url_for('static', filename='img/user1.jpg') }}">
-            <div>
-              <h3>Andi Pratama</h3>
-              <span>Pemilik Rumah</span>
+      <div class="testimoni-mask">
+        <div class="testimoni-slider" id="testiSlider">
+          <!-- 1 -->
+          <div class="testi-card">
+            <div class="testi-profile">
+              <img src="https://i.pravatar.cc/150?img=1" />
+              <div>
+                <h3>Andi Pratama</h3>
+                <span>Pemilik Rumah</span>
+              </div>
             </div>
+            <p>
+              Deteksi kerusakan sangat membantu dan tukangnya profesional.
+            </p>
           </div>
-          <p>Deteksi kerusakan sangat membantu dan tukangnya profesional.</p>
-          <div class="rating">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
+
+          <!-- 2 -->
+          <div class="testi-card">
+            <div class="testi-profile">
+              <img src="https://i.pravatar.cc/150?img=2" />
+              <div>
+                <h3>Siti Rahmawati</h3>
+                <span>Ibu Rumah Tangga</span>
+              </div>
+            </div>
+            <p>Chat langsung dengan tukang bikin komunikasi jadi mudah.</p>
+          </div>
+
+          <!-- 3 -->
+          <div class="testi-card">
+            <div class="testi-profile">
+              <img src="https://i.pravatar.cc/150?img=3" />
+              <div>
+                <h3>Budi Santoso</h3>
+                <span>Pemilik Usaha</span>
+              </div>
+            </div>
+            <p>Harga transparan dan pengerjaan rapi.</p>
+          </div>
+
+          <!-- 4 -->
+          <div class="testi-card">
+            <div class="testi-profile">
+              <img src="https://i.pravatar.cc/150?img=4" />
+              <div>
+                <h3>Dewi Lestari</h3>
+                <span>Karyawan Swasta</span>
+              </div>
+            </div>
+            <p>Aplikasi praktis, tidak ribet cari tukang lagi.</p>
+          </div>
+
+          <!-- 5 -->
+          <div class="testi-card">
+            <div class="testi-profile">
+              <img src="https://i.pravatar.cc/150?img=5" />
+              <div>
+                <h3>Rizky Ananda</h3>
+                <span>Freelancer</span>
+              </div>
+            </div>
+            <p>Fitur chatbotnya responsif dan informatif.</p>
+          </div>
+
+          <!-- 6 -->
+          <div class="testi-card">
+            <div class="testi-profile">
+              <img src="https://i.pravatar.cc/150?img=6" />
+              <div>
+                <h3>Ahmad Fauzi</h3>
+                <span>Kontraktor</span>
+              </div>
+            </div>
+            <p>Sangat cocok untuk kebutuhan perbaikan rumah.</p>
           </div>
         </div>
-
-        <!-- 2 -->
-        <div class="testi-card">
-          <div class="testi-profile">
-            <img src="{{ url_for('static', filename='img/user2.jpg') }}">
-            <div>
-              <h3>Siti Rahmawati</h3>
-              <span>Ibu Rumah Tangga</span>
-            </div>
-          </div>
-          <p>Chat langsung dengan tukang bikin komunikasi jadi mudah.</p>
-          <div class="rating">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star-half-stroke"></i>
-          </div>
-        </div>
-
-        <!-- 3 -->
-        <div class="testi-card">
-          <div class="testi-profile">
-            <img src="{{ url_for('static', filename='img/user3.jpg') }}">
-            <div>
-              <h3>Budi Santoso</h3>
-              <span>Pemilik Usaha</span>
-            </div>
-          </div>
-          <p>Harga transparan dan pengerjaan rapi.</p>
-          <div class="rating">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-regular fa-star"></i>
-          </div>
-        </div>
-
-        <!-- 4 -->
-        <div class="testi-card">
-          <div class="testi-profile">
-            <img src="{{ url_for('static', filename='img/user4.jpg') }}">
-            <div>
-              <h3>Dewi Lestari</h3>
-              <span>Karyawan Swasta</span>
-            </div>
-          </div>
-          <p>Aplikasi praktis, tidak ribet cari tukang lagi.</p>
-          <div class="rating">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-          </div>
-        </div>
-
-        <!-- 5 -->
-        <div class="testi-card">
-          <div class="testi-profile">
-            <img src="{{ url_for('static', filename='img/user5.jpg') }}">
-            <div>
-              <h3>Rizky Ananda</h3>
-              <span>Freelancer</span>
-            </div>
-          </div>
-          <p>Fitur chatbotnya responsif dan informatif.</p>
-          <div class="rating">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-          </div>
-        </div>
-
-        <!-- 6 -->
-        <div class="testi-card">
-          <div class="testi-profile">
-            <img src="{{ url_for('static', filename='img/user6.jpg') }}">
-            <div>
-              <h3>Ahmad Fauzi</h3>
-              <span>Kontraktor</span>
-            </div>
-          </div>
-          <p>Sangat cocok untuk kebutuhan perbaikan rumah.</p>
-          <div class="rating">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-          </div>
-        </div>
-
       </div>
 
       <button class="nav-btn right" onclick="slideTesti(1)">
@@ -847,35 +1046,58 @@
       </button>
     </div>
   </section>
-
-
-  <!-- DOWNLOAD -->
-  <section id="download" class="download">
-    <h2>Unduh Aplikasi Teman Tukang</h2>
-    <p>Pesan tukang profesional langsung dari smartphone Anda</p>
-
-    <div class="store-buttons">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg">
-      <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg">
-    </div>
-  </section>
-
 </body>
+<footer class="footer">
+  <div class="footer-wrap">
+
+    <div class="footer-left">
+      <img src="{{ url_for('static', filename='img/logo_temantukang.png') }}" class="footer-logo" />
+
+      <p>
+        PT Tukang Teknologi Indonesia<br>
+        Jl. Inovasi Digital No. 88<br>
+        Kawasan Teknologi Nusantara<br>
+        Jakarta 12999
+      </p>
+
+      <div class="footer-store">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg">
+      </div>
+    </div>
+
+    <div class="footer-right">
+      <a href="mailto:cs@tukang.com" class="footer-email">
+        cs@tamantukang.com
+      </a>
+
+      <div class="footer-social">
+        Facebook · Instagram · LinkedIn
+      </div>
+
+      <div class="footer-copy">
+        © TemanTukang 2025
+      </div>
+    </div>
+
+  </div>
+</footer>
+
 <script>
   /* ======================
-     TESTIMONI SLIDER
+   TESTIMONI SLIDER
   ====================== */
   let testiIndex = 0;
 
   function slideTesti(dir) {
-    const slider = document.getElementById('testiSlider');
-    const cardWidth = 340;
+    const slider = document.getElementById("testiSlider");
+    const card = slider.querySelector(".testi-card");
+    const cardWidth = card.offsetWidth + 24;
+    const maxIndex = slider.children.length - 3;
+
     testiIndex += dir;
 
     if (testiIndex < 0) testiIndex = 0;
-    if (testiIndex > slider.children.length - 3) {
-      testiIndex = slider.children.length - 3;
-    }
+    if (testiIndex > maxIndex) testiIndex = maxIndex;
 
     slider.style.transform = `translateX(${-testiIndex * cardWidth}px)`;
   }
@@ -883,16 +1105,16 @@
 
 <script>
   /* ======================
-     FITUR SLIDER
+   FITUR SLIDER
   ====================== */
-  const fiturCards = document.querySelectorAll('.fitur-card');
-  const fiturDots = document.querySelectorAll('.dot');
+  const fiturCards = document.querySelectorAll(".fitur-card");
+  const fiturDots = document.querySelectorAll(".dot");
   let fiturIndex = 0;
 
   function showFitur(i) {
     fiturCards.forEach((card, idx) => {
-      card.classList.toggle('active', idx === i);
-      fiturDots[idx].classList.toggle('active', idx === i);
+      card.classList.toggle("active", idx === i);
+      fiturDots[idx].classList.toggle("active", idx === i);
     });
   }
 
@@ -901,5 +1123,54 @@
     showFitur(fiturIndex);
   }, 3000);
 </script>
+
+<script>
+  const hps = document.querySelectorAll(".hp-mock");
+  const stepTitle = document.getElementById("stepTitle");
+  const stepText = document.getElementById("stepText");
+
+  const steps = [
+    ["Pilih kategori layanan", "Pilih layanan sesuai kebutuhan Anda"],
+    ["Tentukan pekerjaan", "Pilih jenis pekerjaan yang diinginkan"],
+    ["Unggah foto", "Unggah foto kondisi rumah"],
+    ["Analisis sistem", "Sistem menganalisis kerusakan"],
+    ["Rekomendasi tukang", "Tukang terbaik ditampilkan"],
+    ["Pilih tukang", "Lihat profil dan ulasan"],
+    ["Pesanan diproses", "Tukang siap bekerja"]
+  ];
+
+  let idx = 0;
+  const total = hps.length;
+
+  function renderStep() {
+    hps.forEach((hp, i) => {
+      hp.className = "hp-mock";
+
+      // hitung jarak MELINGKAR
+      let diff = i - idx;
+      if (diff > total / 2) diff -= total;
+      if (diff < -total / 2) diff += total;
+
+      if (diff === 0) hp.classList.add("active");
+      if (diff === -1) hp.classList.add("l1");
+      if (diff === -2) hp.classList.add("l2");
+      if (diff === -3) hp.classList.add("l3");
+      if (diff === 1) hp.classList.add("r1");
+      if (diff === 2) hp.classList.add("r2");
+      if (diff === 3) hp.classList.add("r3");
+    });
+
+    stepTitle.textContent = steps[idx][0];
+    stepText.textContent = steps[idx][1];
+  }
+
+  function nextStep() {
+    idx = (idx + 1) % total;
+    renderStep();
+  }
+
+  renderStep();
+</script>
+
 
 </html>

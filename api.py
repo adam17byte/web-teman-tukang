@@ -59,8 +59,13 @@ TFIDF_MATRIX = vectorizer.fit_transform(dokumen_tukang)
 @api.route("/api/rekomendasi", methods=["POST"])
 @jwt_required()
 def api_rekomendasi():
+    user_id = int(get_jwt_identity())  # ← AMAN
+
     data = request.get_json()
-    jenis_kerusakan = data["jenis_kerusakan"]
+    jenis_kerusakan = data.get("jenis_kerusakan")
+
+    if not jenis_kerusakan:
+        return jsonify({"error": "jenis_kerusakan required"}), 422
 
     query_vec = vectorizer.transform([jenis_kerusakan])
     sim_scores = cosine_similarity(query_vec, TFIDF_MATRIX).flatten()
@@ -77,7 +82,11 @@ def api_rekomendasi():
                 "foto": t.get("foto", "")
             })
 
-    return jsonify({"status": "success", "data": rekomendasi})
+    return jsonify({
+        "status": "success",
+        "data": rekomendasi
+    }), 200
+
 
 @api.route('/api/review', methods=['POST'])
 @jwt_required()
@@ -225,13 +234,15 @@ def api_login():
                 "message": "Email tidak terdaftar"
             }), 401
 
-        if not bcrypt.check_password_hash(user['password'], password):
+        if not bcrypt.check_password_hash(user["password"], password):
             return jsonify({
                 "status": "error",
                 "message": "Password salah"
             }), 401
 
-        access_token = create_access_token(identity=user['id_users'])
+        access_token = create_access_token(
+            identity=str(user["id_users"])
+        )
 
         return jsonify({
             "status": "success",
@@ -242,7 +253,7 @@ def api_login():
                 "email": user["email"],
                 "role": user["role"]
             }
-        })
+        }), 200
 
     except Exception as e:
         return jsonify({
@@ -302,7 +313,9 @@ def api_login_google():
             )
             user = cursor.fetchone()
 
-        access_token = create_access_token(identity=user['id_users'])
+        access_token = create_access_token(
+            identity=str(user["id_users"])
+        )
 
         return jsonify({
             "status": "success",
@@ -327,22 +340,24 @@ def buat_pesanan():
 
     cursor.execute("""
         INSERT INTO pesanan
-        (user_id, tukang_id, nama_customer, tanggal_pengerjaan, alamat, harga_per_hari)
-        VALUES (%s,%s,%s,%s,%s,%s)
+        (user_id, tukang_id, nama_customer, alamat, tanggal_pengerjaan, harga_per_hari, status)
+        VALUES (%s,%s,%s,%s,%s,%s,'menunggu_konfirmasi')
     """, (
         user_id,
         data["tukang_id"],
         data["nama_customer"],
-        data["tanggal_pengerjaan"],
         data["alamat"],
+        data["tanggal_pengerjaan"],
         data["harga_per_hari"]
     ))
 
     db.commit()
+
     return jsonify({
         "status": "success",
         "message": "Pesanan berhasil dibuat"
     }), 201
+
 
 # HOMEPAGE CUSTOMER (PESANAN AKTIF)
 @api.route("/api/customer/home", methods=["GET"])
@@ -419,11 +434,99 @@ def detail_pesanan(id_pesanan):
         "data": data
     })
 
-# HOMEPAGE TUKANG (PESANAN MASUK & BERJALAN)
-@api.route("/api/tukang/home", methods=["GET"])
+def get_tukang_id_from_jwt():
+    user_id = int(get_jwt_identity())  
+
+    cursor.execute("""
+        SELECT id_tukang
+        FROM tukang
+        WHERE id_users = %s
+    """, (user_id,))
+
+    tukang = cursor.fetchone()
+    if not tukang:
+        return None
+
+    return tukang["id_tukang"]
+
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask import jsonify
+
+# Profil Tukang 
+@api.route("/api/tukang/profile", methods=["GET"])
 @jwt_required()
-def home_tukang():
-    tukang_id = get_jwt_identity()
+def get_tukang_profile():
+    user_id = get_jwt_identity()
+
+    cursor.execute("""
+        SELECT 
+            id_tukang,
+            nama,
+            keahlian,
+            pengalaman,
+            foto,
+            rating,
+            jumlah_ulasan
+        FROM tukang
+        WHERE id_tukang = %s
+    """, (user_id,))
+
+    tukang = cursor.fetchone()
+
+    if not tukang:
+        return jsonify({"message": "Profil tukang tidak ditemukan"}), 404
+
+    return jsonify({
+        "status": "success",
+        "data": tukang
+    }), 200
+from flask import request
+
+# Profil Tukang Edit
+@api.route("/api/tukang/profile", methods=["PUT"])
+@jwt_required()
+def update_tukang_profile():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    nama = data.get("nama")
+    keahlian = data.get("keahlian")
+    pengalaman = data.get("pengalaman")
+    foto = data.get("foto")
+
+    cursor.execute("""
+        SELECT id_tukang FROM tukang WHERE id_tukang = %s
+    """, (user_id,))
+
+    if not cursor.fetchone():
+        return jsonify({"message": "Profil tukang tidak ditemukan"}), 404
+
+    cursor.execute("""
+        UPDATE tukang SET
+            nama=%s,
+            keahlian=%s,
+            pengalaman=%s,
+            foto=%s
+        WHERE id_tukang=%s
+    """, (nama, keahlian, pengalaman, foto, user_id))
+
+    db.commit()
+
+    return jsonify({
+        "status": "success",
+        "message": "Profil berhasil diperbarui"
+    }), 200
+
+@api.route("/api/tukang/pesanan-masuk", methods=["GET"])
+@jwt_required()
+def pesanan_masuk_tukang():
+    tukang_id = get_tukang_id_from_jwt()
+
+    if tukang_id is None:
+        return jsonify({
+            "status": "error",
+            "message": "Akun bukan tukang"
+        }), 403
 
     cursor.execute("""
         SELECT
@@ -434,51 +537,33 @@ def home_tukang():
             harga_per_hari,
             status
         FROM pesanan
-        WHERE tukang_id=%s
-          AND status != 'selesai'
+        WHERE tukang_id = %s
+          AND status = 'menunggu_konfirmasi'
         ORDER BY created_at DESC
     """, (tukang_id,))
 
     return jsonify({
         "status": "success",
         "data": cursor.fetchall()
-    })
+    }), 200
 
-# RIWAYAT PESANAN TUKANG
-@api.route("/api/tukang/pesanan", methods=["GET"])
+
+@api.route("/api/tukang/pesanan/konfirmasi", methods=["PUT"])
 @jwt_required()
-def riwayat_tukang():
-    tukang_id = get_jwt_identity()
-
-    cursor.execute("""
-        SELECT *
-        FROM pesanan
-        WHERE tukang_id=%s
-        ORDER BY created_at DESC
-    """, (tukang_id,))
-
-    return jsonify({
-        "status": "success",
-        "data": cursor.fetchall()
-    })
-
-# UPDATE STATUS (TOMBOL TUKANG)
-@api.route("/api/pesanan/status", methods=["PUT"])
-@jwt_required()
-def update_status():
-    tukang_id = get_jwt_identity()
+def konfirmasi_pesanan():
+    tukang_id = get_tukang_id_from_jwt()
     data = request.get_json()
 
-    VALID_STATUS = [
-        "menunggu_konfirmasi",
-        "diterima",
-        "ditolak",
-        "menuju_lokasi",
-        "dalam_pengerjaan",
-        "selesai"
-    ]
+    if tukang_id is None:
+        return jsonify({
+            "status": "error",
+            "message": "Bukan akun tukang"
+        }), 403
 
-    if data["status"] not in VALID_STATUS:
+    id_pesanan = data.get("id_pesanan")
+    status = data.get("status")
+
+    if status not in ["diterima", "ditolak"]:
         return jsonify({
             "status": "error",
             "message": "Status tidak valid"
@@ -486,14 +571,11 @@ def update_status():
 
     cursor.execute("""
         UPDATE pesanan
-        SET status=%s
-        WHERE id_pesanan=%s
-          AND tukang_id=%s
-    """, (
-        data["status"],
-        data["id_pesanan"],
-        tukang_id
-    ))
+        SET status = %s
+        WHERE id_pesanan = %s
+          AND tukang_id = %s
+          AND status = 'menunggu_konfirmasi'
+    """, (status, id_pesanan, tukang_id))
 
     db.commit()
 
@@ -505,5 +587,145 @@ def update_status():
 
     return jsonify({
         "status": "success",
-        "message": "Status pesanan diperbarui"
-    })
+        "message": "Pesanan diperbarui"
+    }), 200
+
+@api.route("/api/tukang/pesanan/status", methods=["PUT"])
+@jwt_required()
+def update_status_tukang():
+    tukang_id = get_tukang_id_from_jwt()
+    data = request.get_json()
+
+    if tukang_id is None:
+        return jsonify({
+            "status": "error",
+            "message": "Bukan akun tukang"
+        }), 403
+
+    id_pesanan = data.get("id_pesanan")
+    status = data.get("status")
+
+    VALID_STATUS = [
+        "menuju_lokasi",
+        "dalam_pengerjaan",
+        "selesai"
+    ]
+
+    if status not in VALID_STATUS:
+        return jsonify({
+            "status": "error",
+            "message": "Status tidak valid"
+        }), 400
+
+    cursor.execute("""
+        UPDATE pesanan
+        SET status = %s
+        WHERE id_pesanan = %s
+          AND tukang_id = %s
+          AND status != 'ditolak'
+    """, (status, id_pesanan, tukang_id))
+
+    db.commit()
+
+    if cursor.rowcount == 0:
+        return jsonify({
+            "status": "error",
+            "message": "Pesanan tidak ditemukan"
+        }), 404
+
+    return jsonify({
+        "status": "success",
+        "message": "Status diperbarui"
+    }), 200
+
+@api.route("/api/tukang/riwayat", methods=["GET"])
+@jwt_required()
+def riwayat_tukang():
+    tukang_id = get_tukang_id_from_jwt()
+
+    if tukang_id is None:
+        return jsonify({
+            "status": "error",
+            "message": "Bukan akun tukang"
+        }), 403
+
+    cursor.execute("""
+        SELECT *
+        FROM pesanan
+        WHERE tukang_id = %s
+        ORDER BY created_at DESC
+    """, (tukang_id,))
+
+    return jsonify({
+        "status": "success",
+        "data": cursor.fetchall()
+    }), 200
+@api.route("/api/chat/<int:pesanan_id>", methods=["GET"])
+@jwt_required()
+def get_chat(pesanan_id):
+    user_id = get_jwt_identity()   
+
+    cursor.execute("""
+        SELECT id_pesanan FROM pesanan
+        WHERE id_pesanan=%s
+        AND (user_id=%s OR tukang_id=%s)
+    """, (pesanan_id, user_id, user_id))
+
+    if not cursor.fetchone():
+        return jsonify({"message": "Akses ditolak"}), 403
+
+    cursor.execute("""
+        SELECT sender, message, created_at
+        FROM chat
+        WHERE pesanan_id=%s
+        ORDER BY created_at ASC
+    """, (pesanan_id,))
+
+    return jsonify({
+        "status": "success",
+        "data": cursor.fetchall()
+    }), 200
+
+@api.route("/api/chat", methods=["POST"])
+@jwt_required()
+def send_chat():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    pesanan_id = data.get("pesanan_id")
+    message = data.get("message")
+
+    if not pesanan_id or not message:
+        return jsonify({"message": "Data tidak lengkap"}), 400
+
+    cursor.execute("""
+        SELECT role FROM users WHERE id_users=%s
+    """, (user_id,))
+    user = cursor.fetchone()
+
+    if not user:
+        return jsonify({"message": "User tidak valid"}), 401
+
+    sender = user["role"]
+
+    cursor.execute("""
+        SELECT status FROM pesanan
+        WHERE id_pesanan=%s
+        AND (user_id=%s OR tukang_id=%s)
+    """, (pesanan_id, user_id, user_id))
+
+    pesanan = cursor.fetchone()
+    if not pesanan or pesanan["status"] == "selesai":
+        return jsonify({"message": "Chat ditutup"}), 403
+
+    cursor.execute("""
+        INSERT INTO chat (pesanan_id, sender, message)
+        VALUES (%s,%s,%s)
+    """, (pesanan_id, sender, message))
+
+    db.commit()
+
+    return jsonify({
+        "status": "success",
+        "message": "Pesan terkirim"
+    }), 201

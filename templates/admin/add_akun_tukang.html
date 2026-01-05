@@ -4,13 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Tambah Akun Tukang - Admin Teman Tukang</title>
-
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_temantukang.png') }}" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
     <style>
         :root {
             --main: #ff9800;
-            --hover: #e68900;
             --text: #5a5c69;
         }
 
@@ -20,6 +19,7 @@
             background: #f8f9fc;
         }
 
+        /* ===== SIDEBAR (COPY DASHBOARD) ===== */
         .sidebar {
             width: 250px;
             height: 100vh;
@@ -30,10 +30,12 @@
 
         .sidebar-header {
             display: flex;
+            justify-content: center;
             align-items: center;
             gap: 12px;
             padding: 20px;
             font-weight: 700;
+            font-size: 15px;
             border-bottom: 1px solid rgba(255, 255, 255, .2);
         }
 
@@ -44,12 +46,14 @@
             padding: 14px 24px;
             color: white;
             text-decoration: none;
+            font-size: 14px;
         }
 
         .sidebar a:hover {
             background: rgba(255, 255, 255, .2);
         }
 
+        /* ===== NAVBAR (COPY DASHBOARD) ===== */
         .navbar {
             position: fixed;
             left: 250px;
@@ -62,8 +66,49 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            z-index: 10;
         }
 
+        .nav-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .profile-menu {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: var(--text);
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 45px;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            width: 150px;
+            display: none;
+        }
+
+        .profile-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: #5a5c69;
+        }
+
+        .profile-dropdown a:hover {
+            background: #f8f9fc;
+        }
+
+        /* ===== CONTENT (ASLI, TIDAK DIUBAH) ===== */
         .content {
             margin-left: 250px;
             padding: 100px 30px;
@@ -75,11 +120,6 @@
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 0.15rem 1.75rem rgba(58, 59, 69, .15);
-        }
-
-        h2 {
-            margin-bottom: 20px;
-            color: var(--text);
         }
 
         label {
@@ -124,9 +164,9 @@
 
 <body>
 
+    <!-- SIDEBAR (EXACT) -->
     <div class="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-tools"></i> Admin Teman Tukang
+        <div class="sidebar-header">Admin Teman Tukang
         </div>
         <a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <a href="/admin/akun_tukang"><i class="fas fa-user-cog"></i> Kelola Tukang</a>
@@ -136,15 +176,27 @@
         <a href="/admin/review"><i class="fas fa-star"></i> Review Tukang</a>
     </div>
 
+    <!-- NAVBAR (EXACT) -->
     <div class="navbar">
-        <strong>Tambah Akun Tukang</strong>
-        <div><i class="fas fa-user-circle"></i> Admin</div>
+        <div class="nav-title">
+            Tambah Akun Tukang
+        </div>
+        <div class="profile-menu">
+            <i class="fas fa-user-circle"></i>
+            <span>{{ session.get('username','Admin') }}</span>
+            <i class="fas fa-caret-down"></i>
+
+            <div class="profile-dropdown">
+                <a href="/logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
     </div>
 
+    <!-- CONTENT -->
     <div class="content">
         <div class="card">
-            <h2>Tambah Akun Tukang</h2>
-
             <form method="POST">
                 <label>Username</label>
                 <input type="text" name="username" required>
@@ -157,14 +209,29 @@
 
                 <div class="actions">
                     <button type="submit" class="btn-save">Simpan</button>
-                    <button type="button" class="btn-cancel"
-                        onclick="location.href='/admin/akun_tukang'">
+                    <button type="button" class="btn-cancel" onclick="location.href='/admin/akun_tukang'">
                         Batal
                     </button>
                 </div>
             </form>
         </div>
     </div>
+
+    <!-- JS (EXACT) -->
+    <script>
+        const profileMenu = document.querySelector('.profile-menu');
+        const dropdown = document.querySelector('.profile-dropdown');
+
+        profileMenu.addEventListener('click', e => {
+            e.stopPropagation();
+            dropdown.style.display =
+                dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', () => {
+            dropdown.style.display = 'none';
+        });
+    </script>
 
 </body>
 
