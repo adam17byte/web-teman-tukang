@@ -62,6 +62,17 @@ class Admin:
             "avg_rating": avg_rating,
             "rating_counts": rating_counts
         }
+    def pesanan_dashboard(self):
+        self.cursor.execute("""
+        SELECT
+            COUNT(*) AS total,
+            SUM(status='menunggu_konfirmasi') AS menunggu,
+            SUM(status='diterima') AS diterima,
+            SUM(status='selesai') AS selesai,
+            SUM(status='ditolak') AS ditolak
+        FROM pesanan
+        """)
+        return self.cursor.fetchone()
 
 class KelolaTukang:
     def __init__(self, db_cursor):
@@ -152,7 +163,7 @@ class DetailTukang:
             """
             INSERT INTO tukang 
             (id_users, nama, keahlian, pengalaman, foto)
-            VALUES (%s,%s,%s,%s,%s,%s)
+            VALUES (%s,%s,%s,%s,%s)
             """,
             (id_users, nama, keahlian, pengalaman, foto)
     )
@@ -188,6 +199,79 @@ class Review:
             ORDER BY r.tanggal DESC
         """)
         return self.cursor.fetchall()
+    
+class KelolaPesanan:
+    def __init__(self, db_cursor):
+        self.cursor = db_cursor
+
+    def list_pesanan(self, keyword=None):
+        if keyword:
+            self.cursor.execute("""
+                SELECT
+                    p.id_pesanan,
+                    u.username AS customer,
+                    t.nama AS tukang,
+                    p.tanggal_pengerjaan,
+                    p.harga_per_hari,
+                    p.status,
+                    p.metode_pembayaran,
+                    p.status_pembayaran,
+                    p.created_at
+                FROM pesanan p
+                JOIN users u ON p.user_id = u.id_users
+                JOIN tukang t ON p.tukang_id = t.id_tukang
+                WHERE
+                    u.username LIKE %s OR
+                    t.nama LIKE %s OR
+                    p.status LIKE %s
+                ORDER BY p.created_at DESC
+            """, (f"%{keyword}%", f"%{keyword}%", f"%{keyword}%"))
+        else:
+            self.cursor.execute("""
+                SELECT
+                    p.id_pesanan,
+                    u.username AS customer,
+                    t.nama AS tukang,
+                    p.tanggal_pengerjaan,
+                    p.harga_per_hari,
+                    p.status,
+                    p.metode_pembayaran,
+                    p.status_pembayaran,
+                    p.created_at
+                FROM pesanan p
+                JOIN users u ON p.user_id = u.id_users
+                JOIN tukang t ON p.tukang_id = t.id_tukang
+                ORDER BY p.created_at DESC
+            """)
+        return self.cursor.fetchall()
+
+    def detail_pesanan(self, id_pesanan):
+        self.cursor.execute("""
+            SELECT
+                p.id_pesanan,
+                p.alamat,
+                p.tanggal_pengerjaan,
+                p.harga_per_hari,
+                p.status,
+                p.metode_pembayaran,
+                p.status_pembayaran,
+                p.bukti_pembayaran,
+                u.username AS customer,
+                t.nama AS tukang
+            FROM pesanan p
+            JOIN users u ON p.user_id = u.id_users
+            JOIN tukang t ON p.tukang_id = t.id_tukang
+            WHERE p.id_pesanan=%s
+        """, (id_pesanan,))
+        return self.cursor.fetchone()
+
+    def verifikasi_pembayaran(self, id_pesanan, status):
+        self.cursor.execute("""
+            UPDATE pesanan
+            SET status_pembayaran=%s
+            WHERE id_pesanan=%s
+        """, (status, id_pesanan))
+        db.commit()
 
 class WebPromosi:
     def index(self):
@@ -198,6 +282,7 @@ tukang_obj = KelolaTukang(cursor)
 customer_obj = Customer(cursor)
 detail_tukang_obj = DetailTukang(cursor)
 review_obj = Review(cursor)
+pesanan_obj = KelolaPesanan(cursor)
 web_promosi = WebPromosi()
 
 # ROUTES
@@ -228,16 +313,28 @@ def admin_dashboard_route():
     if 'user_role' not in session or session['user_role'] != 'admin':
         flash("Akses ditolak!", "danger")
         return redirect(url_for('login_admin_route'))
+
     data = admin_obj.dashboard_data()
-    return render_template('admin/admin_dashboard.html',
-                           total_akun_tukang=data['total_akun_tukang'],
-                           total_customer=data['total_customer'],
-                           avg_rating=data['avg_rating'],
-                           rating_1=data['rating_counts'][1],
-                           rating_2=data['rating_counts'][2],
-                           rating_3=data['rating_counts'][3],
-                           rating_4=data['rating_counts'][4],
-                           rating_5=data['rating_counts'][5])
+    pesanan = admin_obj.pesanan_dashboard()  # ⬅ TAMBAH INI
+
+    return render_template(
+        'admin/admin_dashboard.html',
+        total_akun_tukang=data['total_akun_tukang'],
+        total_customer=data['total_customer'],
+        avg_rating=data['avg_rating'],
+        rating_1=data['rating_counts'][1],
+        rating_2=data['rating_counts'][2],
+        rating_3=data['rating_counts'][3],
+        rating_4=data['rating_counts'][4],
+        rating_5=data['rating_counts'][5],
+
+        # ⬇⬇ DATA PESANAN
+        total_pesanan=pesanan['total'],
+        pesanan_menunggu=pesanan['menunggu'],
+        pesanan_diterima=pesanan['diterima'],
+        pesanan_selesai=pesanan['selesai'],
+        pesanan_ditolak=pesanan['ditolak']
+    )
 
 # Kelola Tukang
 @app.route('/admin/akun_tukang')
@@ -407,6 +504,49 @@ def list_review_route():
         """)
     reviews = cursor.fetchall()
     return render_template('admin/review.html', reviews=reviews, keyword=keyword)
+
+# KelolaPesanan
+@app.route('/admin/pesanan')
+def admin_pesanan_route():
+    if 'user_role' not in session or session['user_role'] != 'admin':
+        flash("Akses ditolak!", "danger")
+        return redirect(url_for('login_admin_route'))
+
+    keyword = request.args.get('q')
+    pesanan = pesanan_obj.list_pesanan(keyword)
+
+    return render_template(
+        'admin/kelola_pesanan.html',
+        pesanan=pesanan
+    )
+
+@app.route('/admin/pesanan/<int:id>')
+def admin_detail_pesanan_route(id):
+    if 'user_role' not in session or session['user_role'] != 'admin':
+        flash("Akses ditolak!", "danger")
+        return redirect(url_for('login_admin_route'))
+
+    data = pesanan_obj.detail_pesanan(id)
+    if not data:
+        flash("Pesanan tidak ditemukan", "danger")
+        return redirect(url_for('admin_pesanan_route'))
+
+    return render_template(
+        'admin/detail_pesanan.html',
+        pesanan=data
+    )
+@app.route('/admin/pesanan/verifikasi/<int:id>', methods=['POST'])
+def verifikasi_pembayaran_route(id):
+    if 'user_role' not in session or session['user_role'] != 'admin':
+        flash("Akses ditolak!", "danger")
+        return redirect(url_for('login_admin_route'))
+
+    status = request.form['status_pembayaran']
+
+    pesanan_obj.verifikasi_pembayaran(id, status)
+
+    flash("Status pembayaran diperbarui", "success")
+    return redirect(url_for('admin_detail_pesanan_route', id=id))
 
 # WebPromosi
 @app.route('/')

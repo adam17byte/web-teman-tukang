@@ -216,6 +216,14 @@
         .btn-delete {
             background: #e74c3c;
         }
+        .table-scroll {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .table-scroll table {
+            min-width: 900px;
+        }
     </style>
 </head>
 
@@ -262,52 +270,54 @@
         </div>
 
         <div class="table-box">
-            <table>
-                <tr>
-                    <th>No</th>
-                    <th>Nama</th>
-                    <th>Email</th>
-                    <th>Password</th>
-                    <th>Aksi</th>
-                </tr>
+            <!-- TAMBAHAN WRAPPER (TIDAK UBAH TABLE) -->
+            <div class="table-scroll">
+                <table>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama</th>
+                        <th>Email</th>
+                        <th>Password</th>
+                        <th>Aksi</th>
+                    </tr>
 
-                {% for c in akun_tukang %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ c.username }}</td>
-                    <td>{{ c.email }}</td>
-                    <td>{{ c.password }}</td>
-                    <td>
-                        <div class="action-btns">
-                            <a class="btn-edit" href="/admin/akun_tukang/edit/{{ c.id_users }}">
-                                <i class="fas fa-edit"></i> Edit
-                            </a>
-                            <a class="btn-delete" href="/admin/akun_tukang/delete/{{ c.id_users }}"
-                                onclick="return confirm('Hapus tukang ini?')">
-                                <i class="fas fa-trash"></i> Hapus
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
+                    {% for c in akun_tukang %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ c.username }}</td>
+                        <td>{{ c.email }}</td>
+                        <td>{{ c.password }}</td>
+                        <td>
+                            <div class="action-btns">
+                                <a class="btn-edit" href="/admin/akun_tukang/edit/{{ c.id_users }}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a class="btn-delete" href="/admin/akun_tukang/delete/{{ c.id_users }}"
+                                    onclick="return confirm('Hapus tukang ini?')">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
         </div>
-    </div>
 
-    <script>
-        const profileMenu = document.querySelector('.profile-menu');
-        const dropdown = document.querySelector('.profile-dropdown');
+        <script>
+            const profileMenu = document.querySelector('.profile-menu');
+            const dropdown = document.querySelector('.profile-dropdown');
 
-        profileMenu.addEventListener('click', function (e) {
-            e.stopPropagation();
-            dropdown.style.display =
-                dropdown.style.display === 'block' ? 'none' : 'block';
-        });
+            profileMenu.addEventListener('click', function (e) {
+                e.stopPropagation();
+                dropdown.style.display =
+                    dropdown.style.display === 'block' ? 'none' : 'block';
+            });
 
-        document.addEventListener('click', function () {
-            dropdown.style.display = 'none';
-        });
-    </script>
+            document.addEventListener('click', function () {
+                dropdown.style.display = 'none';
+            });
+        </script>
 
 </body>
 
