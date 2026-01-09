@@ -70,6 +70,13 @@
             z-index: 10;
         }
 
+        .nav-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #5a5c69;
+        }
+
+
         /* PROFILE */
         .profile-menu {
             position: relative;
@@ -187,6 +194,9 @@
 
     <div class="navbar">
 
+        <div class="nav-title">
+            Dashboard
+        </div>
         <div class="profile-menu">
             <i class="fas fa-user-circle"></i>
             <span>{{ session.get('username','Admin') }}</span>
@@ -199,7 +209,6 @@
     </div>
 
     <div class="content">
-        <div class="dashboard-title">Dashboard</div>
 
         <div class="cards">
 
