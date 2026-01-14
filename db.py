@@ -4,7 +4,7 @@ db = mysql.connector.connect(
     host="localhost",
     user="root",
     password="",
-    database="capstone_web"
+    database="teman-tukang"
 )
 
 cursor = db.cursor(dictionary=True)
